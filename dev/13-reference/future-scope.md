@@ -1,10 +1,11 @@
 # Future Scope
 
 These are future enhancements and are **NOT** part of the current implementation:
-- Embedding-based semantic matching
-- Vector search (pgvector, Pinecone, Weaviate)
+- Advanced semantic ranking
+- Fine-tuned embedding models
+- Hybrid lexical + semantic search
 - Advanced NLP
-- More sophisticated ranking models
-- Resume similarity search
-- Analytics dashboards
+- Learning-to-rank models
+- Analytics
+- Recommendation improvements
 - Deployment to Vercel/Render/Supabase\n

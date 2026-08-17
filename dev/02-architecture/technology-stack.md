@@ -13,6 +13,7 @@
 
 ## Database
 - PostgreSQL
+- pgvector (for Embeddings and Semantic Match)
 - PostgreSQL CLI / pgAdmin
 - Integer Identity / Serial Primary Keys
 
@@ -30,8 +31,8 @@
 - Git / GitHub
 
 ## Explicitly NOT Using (OUT OF SCOPE)
-- pgvector, Pinecone, Weaviate, Vector databases
-- Embeddings, Vector search, LLM candidate ranking
+- Pinecone, Weaviate, standalone Vector databases outside PostgreSQL
+- LLM candidate ranking
 - Redis, Microservices, Kubernetes, Docker-heavy infrastructure
 - Separate Python ML service, FastAPI, LangChain, RAG systems
 - UUIDs for initial database design\n

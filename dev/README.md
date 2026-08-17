@@ -16,26 +16,20 @@ This is primarily a **DBMS Course Project**. The database and DBMS concepts are 
 To demonstrate deep knowledge of relational databases, SQL, and advanced DBMS concepts (normalization, views, procedures, triggers, transactions, and indexing) in a practical, real-world scenario. The system must NOT become an AI/ML project that happens to use a database.
 
 ## 3. DBMS First
-The priority hierarchy is:
-1. Database design
-2. Relational modeling
-3. Normalization
-4. SQL
-5. Complex queries
-6. Views
-7. Stored procedures
-8. Functions
-9. Triggers
-10. Transactions
-11. Indexing and query optimization
-12. Database access control
-13. Application
-14. AI
+The hierarchy is:
+1. Database Design
+2. Relational Data
+3. SQL
+4. Advanced DBMS
+5. SQL Skill Matching
+6. pgvector Semantic Matching
+7. AI Resume Extraction
+8. Application
 
 ## 4. Final Technology Stack
 - **Frontend:** React, Vite, TypeScript, Tailwind CSS
 - **Backend:** Node.js, Express, TypeScript
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL + pgvector
 - **AI:** OpenAI API
 - **Others:** Git, Postman, Zod
 
@@ -43,28 +37,29 @@ The priority hierarchy is:
 **AI feeds structured information into the database; PostgreSQL remains the source of truth and performs the core data management and matching operations.**
 
 ## 6. Table Structure
-The initial database contains ~11 tables:
+The initial database contains ~13 tables:
 1. `users`
 2. `candidates`
 3. `recruiters`
 4. `resumes`
-5. `skills`
-6. `candidate_skills`
-7. `jobs`
-8. `job_skills`
-9. `applications`
-10. `matches`
-11. `application_status_history`
+5. `resume_extracted_data`
+6. `resume_embeddings`
+7. `skills`
+8. `candidate_skills`
+9. `jobs`
+10. `job_skills`
+11. `applications`
+12. `matches`
+13. `application_status_history`
 
 **Key Strategy:** Integer primary keys (identity/serial) for main entities, and composite primary keys for bridge/associative tables (`candidate_skills`, `job_skills`). UUIDs are strictly NOT used.
 
 ## 7. AI Scope
-AI performs text extraction on resumes to generate structured JSON (skills, education, etc.) which is then inserted into PostgreSQL. It is an input-processing component, not the main decision-maker.
+AI performs text extraction on resumes to generate structured JSON (skills, education, etc.) which is then inserted into PostgreSQL. It is an input-processing component, not the main decision-maker. Embeddings are generated and stored in PostgreSQL using pgvector.
 
 ## 8. Matching Approach
-Matching is strictly SQL-based and relational. It uses a weighted formula:
-`Final Score = (Skill Score × 0.70) + (Experience Score × 0.30)`
-No embeddings, vector databases, or LLM-based candidate ranking are used.
+Matching is SQL-based, deterministic, and includes semantic pgvector comparison. It uses a locked weighted formula:
+`Final Score = (Skill Score × 0.50) + (Semantic Score × 0.30) + (Experience Score × 0.20)`
 
 ## 9. Team Responsibilities
 - **Rajas (approx. 55%):** Database Architecture, SQL Optimization, Candidate/Resume Module, AI extraction.

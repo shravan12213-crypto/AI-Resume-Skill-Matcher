@@ -5,28 +5,30 @@
 
 ## Conceptual Architecture
 ```text
-                         WEB APPLICATION
-                              |
-                              v
-                     +------------------+
-                     |   REST Backend   |
-                     | Node.js/Express  |
-                     +--------+---------+
-                              |
-                 +------------+------------+
-                 |                         |
-                 v                         v
-        +------------------+       +------------------+
-        |    PostgreSQL    |       |    AI Module     |
-        |                  |       |                  |
-        | Candidates       |<------| Resume -> JSON   |
-        | Resumes          |       |                  |
-        | Skills           |       +------------------+
-        | Jobs             |
-        | Applications     |
-        | Matches          |
-        | Procedures       |
-        | Triggers         |
-        | Views            |
-        +------------------+
+                    WEB APPLICATION
+                          |
+                          v
+                  NODE + EXPRESS
+                          |
+             +------------+------------+
+             |                         |
+             v                         v
+       POSTGRESQL                 OPENAI API
+             |                         |
+             |                  Resume → JSON
+             |                         |
+             +------------<------------+
+             |
+             +---- Relational Data
+             |
+             +---- SQL Skill Matching
+             |
+             +---- Experience Matching
+             |
+             +---- pgvector Embeddings
+             |
+             +---- Semantic Matching
+             |
+             v
+        Final Candidate Score
 ```\n

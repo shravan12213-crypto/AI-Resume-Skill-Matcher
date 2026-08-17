@@ -4,18 +4,18 @@
 - User authentication and role management (Candidate, Recruiter, Admin).
 - Candidate resume upload and AI-driven text extraction.
 - Structured storage of candidate skills, experience, and job postings.
-- SQL-based calculation of candidate-job match percentages (70/30 weighting).
+- Embeddings and Semantic Matching via pgvector in PostgreSQL.
+- SQL-based calculation of candidate-job match percentages (50/30/20 weighting).
 - Implementation of 3 stored procedures, 1-2 triggers, functions, and 2 database views.
 - Explainable matching results indicating matched and missing skills.
 - Integer primary keys and composite keys for bridge tables.
 
 ## Out of Scope
-- Embeddings and Vector databases (Pinecone, pgvector).
+- Pinecone, Weaviate, or standalone Vector databases outside of PostgreSQL.
 - Complex Machine Learning pipelines, LangChain, or RAG systems.
 - Advanced Microservices, Docker-heavy infrastructure, or Kubernetes.
-- Using AI to make the final candidate ranking decision or final match score.
+- Using AI/LLM to make the final candidate ranking decision or final match score.
 - UUID primary keys (unless a future decision explicitly changes this).
-- Vector search or LLM candidate ranking.
 
 ## Advanced DBMS Features Checklist
 The project must demonstrate:

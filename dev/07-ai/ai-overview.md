@@ -1,24 +1,27 @@
 # AI Overview
 
-AI performs exactly one core responsibility:
-`Resume -> Text Extraction -> OpenAI API -> Structured JSON -> PostgreSQL`
-
-AI extracts information such as:
-```json
-{
-  "skills": [],
-  "education": [],
-  "experience": [],
-  "projects": [],
-  "certifications": []
-}
+AI performs strictly scoped tasks to enhance the database functionality:
+```text
+Resume
+   ↓
+Text Extraction
+   ↓
+OpenAI API
+   ↓
+Structured Resume Data
+   ↓
+PostgreSQL
+   ↓
+Generate Embedding
+   ↓
+pgvector
+   ↓
+Semantic Similarity
 ```
 
 **AI DOES NOT:**
-- Rank candidates
-- Make hiring decisions
-- Calculate the final match score
-- Replace SQL queries
-- Replace the relational database
+- Rank candidates or make hiring decisions directly via LLM.
+- Replace SQL queries.
+- Replace the relational database.
 
-The database remains the source of truth.\n
+The database remains the source of truth, utilizing pgvector natively.\n

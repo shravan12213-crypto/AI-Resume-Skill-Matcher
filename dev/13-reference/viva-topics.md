@@ -14,5 +14,5 @@ Ensure both team members can confidently explain:
 - Why use a trigger?
 - How does SQL matching work?
 - Why is AI not responsible for ranking?
-- Why did we avoid embeddings?
-- Why 70/30 weighting?\n
+- Why did we include pgvector/embeddings?
+- Why 50/30/20 weighting?\n

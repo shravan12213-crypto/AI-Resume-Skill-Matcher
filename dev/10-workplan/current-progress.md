@@ -4,12 +4,12 @@
 
 ### Summary of Completed Milestones:
 - ✅ **Phase 1: Planning & Architecture**: SSOT established, requirements locked.
-- ✅ **Phase 2: Database Design**: Relational schema, normalization (3NF), 13 tables specified.
+- ✅ **Phase 2: Database Design**: Relational schema, normalization (3NF), 14 tables specified.
 - ✅ **Phase 3: PostgreSQL Implementation**: `schema.sql` and `seed.sql` implemented.
 - ✅ **Phase 4 & 5: Advanced DBMS & Security**:
   - `database/triggers.sql` (application status audit log trigger, closed job validation).
   - `database/views.sql` (`candidate_profile_view`, `job_match_view`, `recruiter_job_summary_view`).
-  - `database/procedures.sql` (`calculate_candidate_job_match`, `apply_to_job`, `get_top_candidates`).
+  - `database/procedures.sql` (`calculate_skill_match`, `apply_to_job`, `get_top_candidates`).
   - `database/roles.sql` (`app_admin`, `app_recruiter`, `app_candidate` with `GRANT`/`REVOKE`).
   - `database/queries/matching.sql` (explainable queries, batch candidate scoring, pgvector cosine distance).
 - ✅ **Backend Implementation (Shravan's Modules)**:

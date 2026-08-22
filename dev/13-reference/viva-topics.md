@@ -15,4 +15,10 @@ Ensure both team members can confidently explain:
 - How does SQL matching work?
 - Why is AI not responsible for ranking?
 - Why did we include pgvector/embeddings?
-- Why 50/30/20 weighting?\n
+- Why 50/30/20 weighting?\n- Why is job_embeddings a separate table?
+- Why do resumes and jobs both have embedding tables?
+- Why is get_top_candidates a FUNCTION instead of a PROCEDURE?
+- Why is apply_to_job a PROCEDURE?
+- What is IVFFLAT?
+- Why do we need a vector index?
+- Why is the semantic score 30% of the final score?

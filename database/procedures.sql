@@ -1,209 +1,191 @@
 -- database/procedures.sql
--- AI-Powered Smart Resume Repository with Skill Matching
--- Stored Procedures & Functions Implementation (Phase 5 & 6)
+-- AI-Powered Smart Resume Repository
+-- Approved PostgreSQL Functions & Procedures
 
 -- ============================================================================
--- 1. FUNCTION: calculate_candidate_job_match
--- Computes the deterministic 50/30/20 weighted score for a candidate and job:
---   Skill Score (50%) + Semantic Score (30%) + Experience Score (20%)
--- Upserts the result into the matches table.
+-- 1. FUNCTION: calculate_skill_match
+-- Calculates the SQL-based skill match percentage (0 to 100) between one 
+-- candidate and one job based solely on 'required' skills.
 -- ============================================================================
 
-CREATE OR REPLACE FUNCTION calculate_candidate_job_match(
+CREATE OR REPLACE FUNCTION calculate_skill_match(
     p_candidate_id INT,
     p_job_id INT
 )
 RETURNS NUMERIC(5,2) AS $$
 DECLARE
-    v_total_required_skills INT := 0;
-    v_matched_required_skills INT := 0;
-    v_skill_score NUMERIC(5,2) := 0.00;
-    
-    v_job_experience_req NUMERIC(3,1) := 0.0;
-    v_candidate_max_exp NUMERIC(3,1) := 0.0;
-    v_experience_score NUMERIC(5,2) := 100.00;
-    
-    v_semantic_score NUMERIC(5,2) := 75.00; -- Default baseline if vector embedding comparison is pending
-    v_final_score NUMERIC(5,2) := 0.00;
+    v_total_required NUMERIC;
+    v_matched_required NUMERIC;
+    v_score NUMERIC(5,2);
 BEGIN
-    -- 1. SKILL SCORING CALCULATION
-    -- Count total required skills for the job
-    SELECT COUNT(*) INTO v_total_required_skills
+    -- Step 1: Count total required skills for the given job
+    SELECT COUNT(*)
+    INTO v_total_required
     FROM job_skills
-    WHERE job_id = p_job_id AND is_required = TRUE;
+    WHERE job_id = p_job_id 
+      AND is_required = TRUE;
 
-    IF v_total_required_skills = 0 THEN
-        -- If no specifically required skills, check total job skills
-        SELECT COUNT(*) INTO v_total_required_skills
-        FROM job_skills
-        WHERE job_id = p_job_id;
+    -- Edge Case 1: If job has zero required skills, return 0 to prevent division by zero
+    IF v_total_required = 0 THEN
+        RETURN 0.00;
     END IF;
 
-    IF v_total_required_skills > 0 THEN
-        -- Count how many of these required skills the candidate possesses
-        SELECT COUNT(*) INTO v_matched_required_skills
-        FROM job_skills js
-        JOIN candidate_skills cs ON js.skill_id = cs.skill_id
-        WHERE js.job_id = p_job_id 
-          AND cs.candidate_id = p_candidate_id
-          AND (js.is_required = TRUE OR v_total_required_skills = (SELECT COUNT(*) FROM job_skills WHERE job_id = p_job_id));
+    -- Step 2: Count how many of those required skills the candidate possesses
+    SELECT COUNT(*)
+    INTO v_matched_required
+    FROM job_skills js
+    JOIN candidate_skills cs ON js.skill_id = cs.skill_id
+    WHERE js.job_id = p_job_id
+      AND js.is_required = TRUE
+      AND cs.candidate_id = p_candidate_id;
 
-        v_skill_score := ROUND((v_matched_required_skills::NUMERIC / v_total_required_skills::NUMERIC) * 100.00, 2);
-    ELSE
-        -- No skill requirements defined
-        v_skill_score := 100.00;
-    END IF;
+    -- Step 3: Calculate the percentage and round to 2 decimal places
+    v_score := ROUND((v_matched_required / v_total_required) * 100.00, 2);
 
-    -- 2. EXPERIENCE SCORING CALCULATION
-    SELECT COALESCE(experience_required, 0.0) INTO v_job_experience_req
-    FROM jobs
-    WHERE job_id = p_job_id;
-
-    -- Calculate candidate max years of experience across relevant matched skills
-    SELECT COALESCE(MAX(cs.years_experience), 0.0) INTO v_candidate_max_exp
-    FROM candidate_skills cs
-    JOIN job_skills js ON cs.skill_id = js.skill_id
-    WHERE cs.candidate_id = p_candidate_id AND js.job_id = p_job_id;
-
-    IF v_job_experience_req <= 0.0 THEN
-        v_experience_score := 100.00;
-    ELSE
-        IF v_candidate_max_exp >= v_job_experience_req THEN
-            v_experience_score := 100.00;
-        ELSE
-            v_experience_score := ROUND((v_candidate_max_exp / v_job_experience_req) * 100.00, 2);
-        END IF;
-    END IF;
-
-    -- 3. FINAL WEIGHTED CALCULATION (50% Skill, 30% Semantic, 20% Experience)
-    v_final_score := ROUND(
-        (v_skill_score * 0.50) + 
-        (v_semantic_score * 0.30) + 
-        (v_experience_score * 0.20), 
-        2
-    );
-
-    -- Cap final score between 0 and 100
-    IF v_final_score > 100.00 THEN
-        v_final_score := 100.00;
-    ELSIF v_final_score < 0.00 THEN
-        v_final_score := 0.00;
-    END IF;
-
-    -- Upsert record into matches table
-    INSERT INTO matches (
-        candidate_id,
-        job_id,
-        skill_score,
-        semantic_score,
-        experience_score,
-        final_score,
-        matched_at
-    ) VALUES (
-        p_candidate_id,
-        p_job_id,
-        v_skill_score,
-        v_semantic_score,
-        v_experience_score,
-        v_final_score,
-        NOW()
-    )
-    ON CONFLICT (candidate_id, job_id)
-    DO UPDATE SET
-        skill_score = EXCLUDED.skill_score,
-        semantic_score = EXCLUDED.semantic_score,
-        experience_score = EXCLUDED.experience_score,
-        final_score = EXCLUDED.final_score,
-        matched_at = NOW();
-
-    RETURN v_final_score;
+    RETURN v_score;
 END;
 $$ LANGUAGE plpgsql;
 
+
 -- ============================================================================
 -- 2. PROCEDURE: apply_to_job
--- Transactional procedure to submit an application and calculate matching score.
--- Enforces data integrity with atomicity and business rule checks.
+-- Transactional procedure to submit a job application safely.
+-- Enforces referential integrity, status checks, and uniqueness constraints.
 -- ============================================================================
 
 CREATE OR REPLACE PROCEDURE apply_to_job(
     p_candidate_id INT,
     p_job_id INT
 )
+LANGUAGE plpgsql
 AS $$
 DECLARE
+    v_candidate_exists BOOLEAN;
     v_job_status VARCHAR(20);
-    v_existing_app INT;
+    v_already_applied BOOLEAN;
 BEGIN
-    -- Check if job exists and is open
+    -- 1. Verify candidate exists
+    SELECT EXISTS (
+        SELECT 1 FROM candidates WHERE candidate_id = p_candidate_id
+    ) INTO v_candidate_exists;
+
+    IF NOT v_candidate_exists THEN
+        RAISE EXCEPTION 'Candidate ID % does not exist.', p_candidate_id;
+    END IF;
+
+    -- 2. Verify job exists and retrieve status
     SELECT status INTO v_job_status
     FROM jobs
     WHERE job_id = p_job_id;
 
     IF v_job_status IS NULL THEN
-        RAISE EXCEPTION 'Job ID % does not exist', p_job_id;
-    ELSIF v_job_status <> 'open' THEN
-        RAISE EXCEPTION 'Job ID % is % and not accepting applications', p_job_id, v_job_status;
+        RAISE EXCEPTION 'Job ID % does not exist.', p_job_id;
     END IF;
 
-    -- Check if candidate has already applied
-    SELECT COUNT(*) INTO v_existing_app
-    FROM applications
-    WHERE candidate_id = p_candidate_id AND job_id = p_job_id;
-
-    IF v_existing_app > 0 THEN
-        RAISE EXCEPTION 'Candidate % has already applied to Job %', p_candidate_id, p_job_id;
+    -- 3. Verify job is currently open
+    IF v_job_status <> 'open' THEN
+        RAISE EXCEPTION 'Job ID % is currently % and not accepting applications.', p_job_id, v_job_status;
     END IF;
 
-    -- Insert application record
-    INSERT INTO applications (candidate_id, job_id, status, applied_at)
-    VALUES (p_candidate_id, p_job_id, 'applied', NOW());
+    -- 4. Prevent duplicate applications 
+    -- (Compliments the UNIQUE(candidate_id, job_id) constraint proactively)
+    SELECT EXISTS (
+        SELECT 1 FROM applications 
+        WHERE candidate_id = p_candidate_id AND job_id = p_job_id
+    ) INTO v_already_applied;
 
-    -- Trigger score calculation
-    PERFORM calculate_candidate_job_match(p_candidate_id, p_job_id);
+    IF v_already_applied THEN
+        RAISE EXCEPTION 'Candidate ID % has already applied to Job ID %.', p_candidate_id, p_job_id;
+    END IF;
 
-    RAISE NOTICE 'Application submitted successfully for candidate % to job %', p_candidate_id, p_job_id;
+    -- 5. Insert the application
+    INSERT INTO applications (candidate_id, job_id, applied_at, status)
+    VALUES (p_candidate_id, p_job_id, NOW(), 'applied');
+
+    -- Demonstrate explicit transaction boundary
+    COMMIT;
 END;
-$$ LANGUAGE plpgsql;
+$$;
+
 
 -- ============================================================================
 -- 3. FUNCTION: get_top_candidates
--- Returns a ranked table of candidates for a specific job based on final_score.
+-- Returns ranked candidates for a given job using the exact project formula.
+-- Uses PostgreSQL FUNCTION semantics to properly return a tabular result set.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION get_top_candidates(
-    p_job_id INT,
-    p_limit INT DEFAULT 10
+    p_job_id INT
 )
 RETURNS TABLE (
     candidate_id INT,
     candidate_name VARCHAR,
-    email VARCHAR,
-    location VARCHAR,
     skill_score NUMERIC(5,2),
     semantic_score NUMERIC(5,2),
     experience_score NUMERIC(5,2),
-    final_score NUMERIC(5,2),
-    application_status VARCHAR
-) AS $$
+    final_score NUMERIC(5,2)
+) 
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_job_exists BOOLEAN;
+    v_req_exp NUMERIC;
 BEGIN
+    -- 1. Validate Job Exists
+    SELECT EXISTS (SELECT 1 FROM jobs WHERE job_id = p_job_id) INTO v_job_exists;
+    IF NOT v_job_exists THEN
+        RAISE EXCEPTION 'Job ID % does not exist.', p_job_id;
+    END IF;
+
+    -- 2. Fetch required experience for the job
+    SELECT COALESCE(experience_required, 0) INTO v_req_exp
+    FROM jobs
+    WHERE job_id = p_job_id;
+
+    -- 3. Calculate Scores and Return Ranked Candidates
     RETURN QUERY
+    WITH candidate_scores AS (
+        SELECT 
+            c.candidate_id,
+            u.name AS candidate_name,
+            
+            -- A. Skill Score (Directly reuses existing function)
+            calculate_skill_match(c.candidate_id, p_job_id) AS skill_score,
+            
+            -- B. Semantic Score
+            -- LIMITATION: The current schema has `resume_embeddings` but lacks a 
+            -- `job_embeddings` table or column. Semantic matching cannot be computed yet.
+            -- Returning NULL strictly as required.
+            NULL::NUMERIC(5,2) AS semantic_score,
+            
+            -- C. Experience Score
+            (
+                SELECT 
+                    CASE 
+                        WHEN v_req_exp = 0 THEN 100.00
+                        WHEN COALESCE(MAX(cs.years_experience), 0) >= v_req_exp THEN 100.00
+                        ELSE ROUND((COALESCE(MAX(cs.years_experience), 0) / v_req_exp) * 100.00, 2)
+                    END
+                FROM candidate_skills cs
+                JOIN job_skills js ON cs.skill_id = js.skill_id
+                WHERE cs.candidate_id = c.candidate_id AND js.job_id = p_job_id
+            )::NUMERIC(5,2) AS experience_score
+        FROM candidates c
+        JOIN users u ON c.user_id = u.user_id
+    )
     SELECT 
-        c.candidate_id,
-        u.name AS candidate_name,
-        u.email,
-        c.location,
-        m.skill_score,
-        m.semantic_score,
-        m.experience_score,
-        m.final_score,
-        app.status AS application_status
-    FROM matches m
-    JOIN candidates c ON m.candidate_id = c.candidate_id
-    JOIN users u ON c.user_id = u.user_id
-    LEFT JOIN applications app ON (app.candidate_id = m.candidate_id AND app.job_id = m.job_id)
-    WHERE m.job_id = p_job_id
-    ORDER BY m.final_score DESC, m.skill_score DESC
-    LIMIT p_limit;
+        cs.candidate_id,
+        cs.candidate_name,
+        cs.skill_score,
+        cs.semantic_score,
+        cs.experience_score,
+        
+        -- D. Final Score 
+        -- Mathematical addition with NULL evaluates to NULL.
+        -- This explicitly cascades the limitation so the application knows the score is incomplete
+        -- and avoids silently treating missing semantic data as a valid zero.
+        ( (cs.skill_score * 0.50) + (cs.semantic_score * 0.30) + (cs.experience_score * 0.20) )::NUMERIC(5,2) AS final_score
+    FROM candidate_scores cs
+    ORDER BY final_score DESC NULLS LAST, cs.candidate_id ASC;
 END;
-$$ LANGUAGE plpgsql;
+$$;

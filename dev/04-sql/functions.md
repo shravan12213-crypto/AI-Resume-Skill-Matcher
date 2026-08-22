@@ -1,6 +1,7 @@
 # Functions
 
-Use PostgreSQL functions where appropriate without creating unnecessary ones.
+The DBMS project uses PostgreSQL functions for routines that calculate values or return datasets.
 
-Potential Function:
-- `calculate_match_percentage(...)`: A function containing the mathematical calculation for skill matching.\n
+Confirmed Functions:
+- `calculate_skill_match(candidate_id, job_id)`: Contains the mathematical calculation for skill matching.
+- `get_top_candidates(job_id)`: Returns a tabular result set of ranked candidates for a specific job using `RETURNS TABLE`.

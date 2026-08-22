@@ -1,4 +1,4 @@
-# Matching Algorithm
+﻿# Matching Algorithm
 
 Do NOT use LLM-based candidate ranking.
 
@@ -12,7 +12,10 @@ The final candidate matching score is permanently locked to the following weight
 - **Experience Score**: 20% weight
 
 ```text
-Final Score = (Skill Score × 0.50) + (Semantic Score × 0.30) + (Experience Score × 0.20)
+Final Score =
+    (Skill Score Ã— 0.50)
+  + (Semantic Score Ã— 0.30)
+  + (Experience Score Ã— 0.20)
 ```
 
 **Example:**
@@ -21,7 +24,7 @@ Final Score = (Skill Score × 0.50) + (Semantic Score × 0.30) + (Experience Sco
 - Experience Score = 100%
 
 ```text
-Final Score = (80 × 0.50) + (90 × 0.30) + (100 × 0.20)
+Final Score = (80 Ã— 0.50) + (90 Ã— 0.30) + (100 Ã— 0.20)
 = 40 + 27 + 20
 = 87%
 ```

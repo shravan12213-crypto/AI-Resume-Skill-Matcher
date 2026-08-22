@@ -33,9 +33,10 @@ GRANT SELECT, UPDATE ON recruiters TO app_recruiter;
 GRANT SELECT ON candidate_profile_view, job_match_view, recruiter_job_summary_view TO app_recruiter;
 GRANT USAGE, SELECT ON SEQUENCE jobs_job_id_seq TO app_recruiter;
 
--- Stored Functions
-GRANT EXECUTE ON FUNCTION calculate_candidate_job_match(INT, INT) TO app_recruiter;
-GRANT EXECUTE ON FUNCTION get_top_candidates(INT, INT) TO app_recruiter;
+-- Stored Functions & Procedures
+GRANT EXECUTE ON FUNCTION calculate_skill_match(INT, INT) TO app_recruiter;
+GRANT EXECUTE ON PROCEDURE apply_to_job(INT, INT) TO app_recruiter;
+GRANT EXECUTE ON FUNCTION get_top_candidates(INT) TO app_recruiter;
 ```
 
 ## 4. Candidate Role (`app_candidate`)

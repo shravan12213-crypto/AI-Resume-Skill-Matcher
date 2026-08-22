@@ -37,20 +37,21 @@ The hierarchy is:
 **AI feeds structured information into the database; PostgreSQL remains the source of truth and performs the core data management and matching operations.**
 
 ## 6. Table Structure
-The initial database contains ~13 tables:
+The initial database contains ~14 tables:
 1. `users`
 2. `candidates`
 3. `recruiters`
 4. `resumes`
 5. `resume_extracted_data`
 6. `resume_embeddings`
-7. `skills`
-8. `candidate_skills`
+7. `job_embeddings`
+8. `skills`
 9. `jobs`
-10. `job_skills`
-11. `applications`
-12. `matches`
-13. `application_status_history`
+10. `candidate_skills`
+11. `job_skills`
+12. `applications`
+13. `matches`
+14. `application_status_history`
 
 **Key Strategy:** Integer primary keys (identity/serial) for main entities, and composite primary keys for bridge/associative tables (`candidate_skills`, `job_skills`). UUIDs are strictly NOT used.
 

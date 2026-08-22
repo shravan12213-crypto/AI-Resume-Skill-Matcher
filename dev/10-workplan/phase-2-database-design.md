@@ -17,4 +17,4 @@ Complete this sequence during Phase 2:
 12. Convert ER model to relational schema
 13. Check normalization (up to 3NF)
 14. Validate schema against requirements
-15. Review with both team members\n
+15. Review with both team members

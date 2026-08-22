@@ -95,7 +95,17 @@ CREATE TABLE jobs (
     FOREIGN KEY (recruiter_id) REFERENCES recruiters(recruiter_id) ON DELETE CASCADE
 );
 
--- Table 9: candidate_skills
+-- Table 9: job_embeddings
+CREATE TABLE job_embeddings (
+    embedding_id SERIAL PRIMARY KEY,
+    job_id       INTEGER NOT NULL UNIQUE,
+    embedding    VECTOR(1536),
+    created_at   TIMESTAMP NOT NULL DEFAULT NOW(),
+    FOREIGN KEY (job_id) REFERENCES jobs(job_id) ON DELETE CASCADE
+);
+-- Comment: Semantic matching embedding for job descriptions via pgvector.
+
+-- Table 10: candidate_skills
 CREATE TABLE candidate_skills (
     candidate_id     INTEGER NOT NULL,
     skill_id         INTEGER NOT NULL,
@@ -107,7 +117,7 @@ CREATE TABLE candidate_skills (
 );
 -- Comment: Bridge table representing CANDIDATE M --- N SKILL. Uses composite PK.
 
--- Table 10: job_skills
+-- Table 11: job_skills
 CREATE TABLE job_skills (
     job_id             INTEGER NOT NULL,
     skill_id           INTEGER NOT NULL,
@@ -119,7 +129,7 @@ CREATE TABLE job_skills (
 );
 -- Comment: Bridge table representing JOB M --- N SKILL. Uses composite PK.
 
--- Table 11: applications
+-- Table 12: applications
 CREATE TABLE applications (
     application_id SERIAL PRIMARY KEY,
     candidate_id   INTEGER NOT NULL,
@@ -131,7 +141,7 @@ CREATE TABLE applications (
     FOREIGN KEY (job_id) REFERENCES jobs(job_id) ON DELETE CASCADE
 );
 
--- Table 12: matches
+-- Table 13: matches
 CREATE TABLE matches (
     match_id         SERIAL PRIMARY KEY,
     candidate_id     INTEGER NOT NULL,
@@ -146,7 +156,7 @@ CREATE TABLE matches (
     FOREIGN KEY (job_id) REFERENCES jobs(job_id) ON DELETE CASCADE
 );
 
--- Table 13: application_status_history
+-- Table 14: application_status_history
 CREATE TABLE application_status_history (
     history_id     SERIAL PRIMARY KEY,
     application_id INTEGER NOT NULL,

@@ -144,7 +144,19 @@ BEGIN
 
     -- 3. Calculate Scores and Return Ranked Candidates
     RETURN QUERY
-    WITH candidate_scores AS (
+    WITH target_job_emb AS (
+        SELECT embedding
+        FROM job_embeddings
+        WHERE job_id = p_job_id
+    ),
+    latest_resumes AS (
+        SELECT DISTINCT ON (r.candidate_id)
+            r.candidate_id,
+            r.resume_id
+        FROM resumes r
+        ORDER BY r.candidate_id, r.uploaded_at DESC
+    ),
+    candidate_scores AS (
         SELECT 
             c.candidate_id,
             u.name AS candidate_name,
@@ -153,10 +165,7 @@ BEGIN
             calculate_skill_match(c.candidate_id, p_job_id) AS skill_score,
             
             -- B. Semantic Score
-            -- LIMITATION: The current schema has `resume_embeddings` but lacks a 
-            -- `job_embeddings` table or column. Semantic matching cannot be computed yet.
-            -- Returning NULL strictly as required.
-            NULL::NUMERIC(5,2) AS semantic_score,
+            GREATEST(0.00, LEAST(100.00, (1 - (re.embedding <=> tje.embedding)) * 100))::NUMERIC(5,2) AS semantic_score,
             
             -- C. Experience Score
             (
@@ -172,6 +181,9 @@ BEGIN
             )::NUMERIC(5,2) AS experience_score
         FROM candidates c
         JOIN users u ON c.user_id = u.user_id
+        LEFT JOIN latest_resumes lr ON lr.candidate_id = c.candidate_id
+        LEFT JOIN resume_embeddings re ON re.resume_id = lr.resume_id
+        LEFT JOIN target_job_emb tje ON TRUE
     )
     SELECT 
         cs.candidate_id,
@@ -181,9 +193,6 @@ BEGIN
         cs.experience_score,
         
         -- D. Final Score 
-        -- Mathematical addition with NULL evaluates to NULL.
-        -- This explicitly cascades the limitation so the application knows the score is incomplete
-        -- and avoids silently treating missing semantic data as a valid zero.
         ( (cs.skill_score * 0.50) + (cs.semantic_score * 0.30) + (cs.experience_score * 0.20) )::NUMERIC(5,2) AS final_score
     FROM candidate_scores cs
     ORDER BY final_score DESC NULLS LAST, cs.candidate_id ASC;

@@ -2,19 +2,23 @@
 
 ## In Scope
 - User authentication and role management (Candidate, Recruiter, Admin).
-- Candidate resume upload and AI-driven text extraction.
-- Structured storage of candidate skills, experience, and job postings.
-- Embeddings and Semantic Matching via pgvector in PostgreSQL.
-- SQL-based calculation of candidate-job match percentages (50/30/20 weighting).
-- Implementation of 3 stored procedures, 1-2 triggers, functions, and 2 database views.
-- Explainable matching results indicating matched and missing skills.
-- Integer primary keys and composite keys for bridge tables.
+- Candidate resume upload and AI-driven structured text extraction (JSON output into PostgreSQL).
+- Structured relational storage of candidates, recruiters, resumes, jobs, and normalized skills.
+- Pure SQL and PL/pgSQL candidate matching via table-valued stored function `get_top_candidates(p_job_id)`.
+- Locked matching scoring formula: **70% Skill Score + 30% Experience Score**.
+- Implementation of transactional stored procedure `apply_to_job(candidate_id, job_id)`.
+- Status history audit trigger `trg_application_status_history` logging to `application_status_history`.
+- Explainable matching results indicating matched vs missing required skills.
+- Integer primary keys and composite primary keys for bridge tables (`candidate_skills`, `job_skills`).
+- Realistic B-Tree indexing and `EXPLAIN ANALYZE` performance benchmarking.
 
 ## Out of Scope
-- Pinecone, Weaviate, or standalone Vector databases outside of PostgreSQL.
+- Vector databases, pgvector, embeddings (`VECTOR(1536)`), and vector distance (`<=>`).
+- Pinecone, Weaviate, or external semantic search engines.
 - Complex Machine Learning pipelines, LangChain, or RAG systems.
+- Using AI/LLM to rank candidates or compute the final match score.
+- 50/30/20 scoring formula.
 - Advanced Microservices, Docker-heavy infrastructure, or Kubernetes.
-- Using AI/LLM to make the final candidate ranking decision or final match score.
 - UUID primary keys (unless a future decision explicitly changes this).
 
 ## Advanced DBMS Features Checklist
@@ -29,25 +33,21 @@ The project must demonstrate:
 - [ ] Constraints
 
 ### SQL
-- [ ] CRUD
-- [ ] Joins
-- [ ] Aggregations
-- [ ] GROUP BY
-- [ ] HAVING
-- [ ] Subqueries
-- [ ] EXISTS
-- [ ] NOT EXISTS
-- [ ] CASE
-- [ ] Conditional aggregation
+- [ ] CRUD Operations
+- [ ] Joins (Inner, Left, Cross)
+- [ ] Aggregations (COUNT, MAX, SUM, AVG)
+- [ ] GROUP BY & HAVING
+- [ ] Subqueries & Common Table Expressions (CTEs)
+- [ ] EXISTS & NOT EXISTS
+- [ ] CASE & Conditional Logic
+- [ ] NULL handling (COALESCE, NULLIF)
 
 ### Advanced DBMS
-- [ ] Views (2 confirmed)
-- [ ] Functions
-- [ ] Stored Procedures (3 confirmed)
-- [ ] Triggers (1-2 confirmed)
-- [ ] Transactions
+- [ ] Table-Valued Stored Functions (`get_top_candidates`)
+- [ ] Transactional Stored Procedures (`apply_to_job`)
+- [ ] Triggers (`trg_application_status_history`)
+- [ ] Database Views (`recruiter_job_summary_view`, `candidate_profile_view`)
+- [ ] Transactions & ACID boundaries (`COMMIT`)
 - [ ] Indexes (2-3 realistic)
-- [ ] EXPLAIN ANALYZE
-- [ ] Database Roles
-- [ ] GRANT
-- [ ] REVOKE\n
+- [ ] EXPLAIN ANALYZE & Query Optimization
+- [ ] Database Roles, GRANT, REVOKE

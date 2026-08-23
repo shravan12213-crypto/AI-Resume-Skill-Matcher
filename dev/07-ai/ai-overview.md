@@ -1,27 +1,34 @@
 # AI Overview
 
-AI performs strictly scoped tasks to enhance the database functionality:
+AI performs strictly scoped text extraction tasks to enhance the database with structured data:
+
 ```text
-Resume
-   ↓
-Text Extraction
-   ↓
-OpenAI API
-   ↓
-Structured Resume Data
-   ↓
-PostgreSQL
-   ↓
-Generate Embedding
-   ↓
-pgvector
-   ↓
-Semantic Similarity
+Candidate Resume (PDF/DOCX)
+            │
+            ▼
+Text Extraction Pipeline
+            │
+            ▼
+OpenAI Structured Parsing
+            │
+            ▼
+Structured JSON (Skills, Education, Experience)
+            │
+            ▼
+PostgreSQL Database (Normalized Tables)
 ```
 
-**AI DOES NOT:**
-- Rank candidates or make hiring decisions directly via LLM.
-- Replace SQL queries.
-- Replace the relational database.
+## Strict Boundary Rules
 
-The database remains the source of truth, utilizing pgvector natively.\n
+**AI DOES:**
+- Extract plain text from uploaded resume documents.
+- Parse unstructured resume sections into structured JSON (skills array, educational history, project summaries, years of experience).
+- Feed structured data directly into PostgreSQL.
+
+**AI DOES NOT:**
+- Rank candidates or make hiring decisions.
+- Perform candidate scoring or matching.
+- Generate vector embeddings for candidate comparison.
+- Replace SQL queries or relational data models.
+
+PostgreSQL is the single source of truth and performs all candidate matching, scoring, and ranking internally via SQL.

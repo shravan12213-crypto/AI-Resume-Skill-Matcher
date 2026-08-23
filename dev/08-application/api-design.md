@@ -19,8 +19,8 @@ The backend implements RESTful API endpoints organized into functional modules b
 - **`GET /api/applications/:id/history`**: Returns the audit trail from `application_status_history`.
 
 ## 4. Matching Engine (`/api/matching`)
-- **`GET /api/matching/job/:jobId/top-candidates`**: Returns ranked candidate list by querying the `get_top_candidates(job_id)` PostgreSQL function.
-- **`GET /api/matching/explain/job/:jobId/candidate/:candidateId`**: Returns explainable breakdown with matched skills ($\checkmark$), missing required skills ($\times$), experience score, and 50/30/20 weights.
+- **`GET /api/matching/job/:jobId/top-candidates`**: Returns ranked candidate list by querying the `get_top_candidates(job_id)` PostgreSQL table-valued function.
+- **`GET /api/matching/explain/job/:jobId/candidate/:candidateId`**: Returns explainable breakdown with matched skills ($\checkmark$), missing required skills ($\times$), experience score, and 70% Skill + 30% Experience weights.
 - **`POST /api/matching/calculate-skill`**: Triggers `calculate_skill_match(candidate_id, job_id)` in PostgreSQL.
 
 ## 5. Healthcheck (`/api/health`)

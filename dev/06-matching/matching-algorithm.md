@@ -1,32 +1,54 @@
-﻿# Matching Algorithm
+# Matching Algorithm
 
-Do NOT use LLM-based candidate ranking.
+Candidate ranking is executed inside PostgreSQL using relational SQL. AI and LLMs do **NOT** rank candidates.
 
-The matching system uses PostgreSQL and pgvector to generate an explainable, deterministic final score.
+The matching system uses PostgreSQL table-valued PL/pgSQL function `get_top_candidates(p_job_id)` to generate an explainable, deterministic final score.
 
 ## Final Match Formula
 
-The final candidate matching score is permanently locked to the following weights for the current version:
-- **Skill Score**: 50% weight
-- **Semantic Score**: 30% weight
-- **Experience Score**: 20% weight
+The final candidate matching score is permanently locked to the following weights:
+- **Skill Score**: 70% weight
+- **Experience Score**: 30% weight
 
 ```text
 Final Score =
-    (Skill Score Ã— 0.50)
-  + (Semantic Score Ã— 0.30)
-  + (Experience Score Ã— 0.20)
+    (Skill Score × 0.70)
+  + (Experience Score × 0.30)
 ```
 
-**Example:**
+### Example Calculation:
 - Skill Score = 80%
-- Semantic Score = 90%
-- Experience Score = 100%
+- Experience Score = 90%
 
 ```text
-Final Score = (80 Ã— 0.50) + (90 Ã— 0.30) + (100 Ã— 0.20)
-= 40 + 27 + 20
-= 87%
+Final Score = (80 × 0.70) + (90 × 0.30)
+            = 56 + 27
+            = 83%
 ```
 
-The final score must always remain between 0 and 100.\n
+The final score must always remain between 0 and 100.
+
+## Explainability
+The function returns granular metrics to ensure total transparency for recruiters:
+```text
+Candidate A
+
+Skill Score:       80%  (4 / 5 required skills matched)
+Experience Score: 100%  (3 yrs / 3 yrs required)
+Final Score:       86%
+
+Matched:
+✓ Python
+✓ SQL
+✓ React
+✓ Node.js
+
+Missing:
+✗ Docker
+```
+
+## Out of Scope
+- No vector embeddings (`pgvector`, `resume_embeddings`, `job_embeddings`).
+- No cosine distance (`<=>`).
+- No 50/30/20 formula.
+- No LLM-based ranking or scoring.

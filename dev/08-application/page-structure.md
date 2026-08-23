@@ -19,11 +19,11 @@ The recruiter frontend is a React + Vite + TypeScript Single Page Application wi
 - Status filter tabs (`all`, `applied`, `shortlisted`, `hired`, `rejected`).
 - Candidate cards with instant status transition buttons (`Shortlist`, `Hire`, `Reject`).
 - **Audit Trail Trigger Button**: Opens `StatusHistoryModal` to inspect database trigger audit entries.
-- **Match Score Chip**: Opens `ExplainMatchModal` to inspect 50/30/20 breakdown.
+- **Match Score Chip**: Opens `ExplainMatchModal` to inspect 70% Skill + 30% Experience breakdown.
 
 ## 4. Candidate Ranking Leaderboard (`RankingView.tsx`)
 - Job-specific ranked candidate leaderboard (`#1`, `#2`, `#3` podium badges).
-- Progress meters for **50% Skill**, **30% Semantic pgvector**, **20% Experience**, and **Final Score**.
+- Progress meters for **70% Skill Score**, **30% Experience Score**, and **Final Match Score**.
 - **Explain Breakdown** button for deep audit.
 
 ## 5. Modals

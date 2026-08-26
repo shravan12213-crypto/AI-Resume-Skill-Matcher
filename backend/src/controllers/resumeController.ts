@@ -127,3 +127,42 @@ export const deleteResume = async (
     next(error);
   }
 };
+
+import * as aiService from '../services/aiService';
+
+export const extractResume = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const candidateId = parseInt(req.params.candidateId, 10);
+    const resumeId = parseInt(req.params.resumeId, 10);
+    
+    if (isNaN(candidateId) || isNaN(resumeId)) {
+      res.status(400).json({ success: false, message: 'Invalid IDs' });
+      return;
+    }
+
+    const resume = await resumeService.getResumeByIdAndCandidate(resumeId, candidateId);
+    if (!resume) {
+      res.status(404).json({ success: false, message: 'Resume not found' });
+      return;
+    }
+
+    if (!resume.raw_text || resume.raw_text.trim() === '') {
+      res.status(400).json({ success: false, message: 'Resume raw_text is empty or missing' });
+      return;
+    }
+
+    // Call AI Extraction
+    const extractedData = await aiService.extractResumeData(resume.raw_text);
+
+    // Save structured data and skills
+    const savedData = await aiService.saveExtractionAndSkills(resumeId, candidateId, extractedData);
+
+    res.json({ success: true, data: savedData });
+  } catch (error: any) {
+    next(error);
+  }
+};

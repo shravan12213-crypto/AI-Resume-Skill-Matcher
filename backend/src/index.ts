@@ -7,6 +7,7 @@ import recruiterRoutes from './routes/recruiterRoutes';
 import jobRoutes from './routes/jobRoutes';
 import applicationRoutes from './routes/applicationRoutes';
 import matchingRoutes from './routes/matchingRoutes';
+import candidateRoutes from './routes/candidateRoutes';
 import { errorHandler } from './middleware/errorHandler';
 import { pool } from './config/db';
 
@@ -43,6 +44,7 @@ app.use('/api/recruiters', recruiterRoutes);
 app.use('/api/jobs', jobRoutes);
 app.use('/api/applications', applicationRoutes);
 app.use('/api/matching', matchingRoutes);
+app.use('/api/candidates', candidateRoutes);
 
 // Error Handling Middleware
 app.use(errorHandler);

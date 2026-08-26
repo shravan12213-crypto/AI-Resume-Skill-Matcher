@@ -1,8 +1,20 @@
 // frontend/src/components/ExplainMatchModal.tsx
 import React, { useEffect, useState } from 'react';
-import { X, CheckCircle2, XCircle, Award, Database, BrainCircuit, Briefcase, HelpCircle, Loader2 } from 'lucide-react';
+import {
+  X,
+  CheckCircle2,
+  XCircle,
+  Award,
+  Database,
+  Briefcase,
+  Loader2,
+  Sparkles,
+  Calculator
+} from 'lucide-react';
 import { ExplainableMatch } from '../types';
 import { api } from '../services/api';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
 
 interface ExplainMatchModalProps {
   isOpen: boolean;
@@ -33,160 +45,155 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
 
   if (!isOpen) return null;
 
+  const skillScore = Number(data?.scores?.skill_score || 0);
+  const expScore = Number(data?.scores?.experience_score || 0);
+  const finalScore = Number(data?.scores?.final_score || 0);
+
+  const skillContribution = (skillScore * 0.7).toFixed(1);
+  const expContribution = (expScore * 0.3).toFixed(1);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fadeIn">
-      <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
-          <div>
-            <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-              <Award className="w-5 h-5 text-indigo-400" />
-              <span>Explainable Match Score Breakdown</span>
-            </h2>
-            <p className="text-xs text-slate-400">
-              Deterministic scoring formula for <span className="text-indigo-400 font-semibold">{data?.scores?.candidate_name || 'Candidate'}</span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-2xl bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
+        
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800 bg-zinc-900/90">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <Calculator className="w-4 h-4 text-zinc-400" />
+              <h2 className="text-base font-semibold text-white font-display">
+                Transparent Match Calculation
+              </h2>
+            </div>
+            <p className="text-xs text-zinc-400">
+              Deterministic breakdown for candidate <span className="text-zinc-200 font-medium">{data?.scores?.candidate_name || `#${candidateId}`}</span>
             </p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800">
-            <X className="w-5 h-5" />
-          </button>
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 rounded-full">
+            <X className="w-4 h-4 text-zinc-400" />
+          </Button>
         </div>
 
         {/* Modal Body */}
         <div className="p-6 space-y-6 overflow-y-auto flex-1">
           {loading ? (
-            <div className="py-12 flex flex-col items-center justify-center text-slate-400 space-y-2">
-              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-              <span className="text-xs font-medium">Fetching relational match data...</span>
+            <div className="py-12 flex flex-col items-center justify-center text-zinc-400 space-y-2">
+              <Loader2 className="w-7 h-7 animate-spin text-zinc-400" />
+              <span className="text-xs font-medium">Computing in-database score breakdown...</span>
             </div>
           ) : (
             <>
               {/* Formula & Overall Score Banner */}
-              <div className="p-5 rounded-xl bg-gradient-to-r from-indigo-950/50 via-slate-900 to-purple-950/50 border border-indigo-500/20">
+              <div className="p-5 rounded-2xl bg-zinc-950/80 border border-zinc-800">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400">
+                  <div className="space-y-1">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400">
                       Locked Weighting Formula
                     </span>
-                    <div className="text-xs font-mono text-slate-300 mt-1">
-                      Final = (Skill × 0.50) + (Semantic × 0.30) + (Exp × 0.20)
+                    <div className="text-xs font-mono text-zinc-200 bg-zinc-900/80 px-2 py-1 rounded-lg border border-zinc-800">
+                      Final Score = (Skill Score × 0.70) + (Experience Score × 0.30)
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-[10px] uppercase font-bold text-slate-400">Final Score</div>
-                    <div className="text-3xl font-black text-indigo-300">
-                      {data?.scores?.final_score ?? 85}%
+                    <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-500">Overall Match</div>
+                    <div className="text-3xl font-bold font-display text-white">
+                      {finalScore.toFixed(1)}%
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* 3 Metric Score Breakdown Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Skill Score (50%) */}
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="flex items-center space-x-1 font-semibold text-slate-300">
-                      <Database className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>Skill Score</span>
+              {/* 2 Metric Score Breakdown Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* Skill Score (70%) */}
+                <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <span className="flex items-center gap-1.5 font-medium text-zinc-200">
+                      <Database className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Skill Match</span>
                     </span>
-                    <span className="text-indigo-400 font-bold">{data?.scores?.skill_score ?? 80}%</span>
+                    <span className="text-emerald-400 font-bold font-mono">{skillScore.toFixed(0)}%</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-2">
-                    Weight: <span className="text-slate-300 font-semibold">50%</span>
-                  </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Contribution: <span className="text-indigo-400 font-bold">{(((data?.scores?.skill_score ?? 80) * 0.5)).toFixed(1)} pts</span>
+                  <div className="flex justify-between text-[11px] text-zinc-400 pt-1 border-t border-zinc-800/50">
+                    <span>Weight: <strong className="text-zinc-200">70%</strong></span>
+                    <span>Contribution: <strong className="text-emerald-300 font-mono">+{skillContribution} pts</strong></span>
                   </div>
                 </div>
 
-                {/* Semantic Score (30%) */}
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="flex items-center space-x-1 font-semibold text-slate-300">
-                      <BrainCircuit className="w-3.5 h-3.5 text-purple-400" />
-                      <span>pgvector Score</span>
+                {/* Experience Score (30%) */}
+                <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <span className="flex items-center gap-1.5 font-medium text-zinc-200">
+                      <Briefcase className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Experience Match</span>
                     </span>
-                    <span className="text-purple-400 font-bold">{data?.scores?.semantic_score ?? 75}%</span>
+                    <span className="text-indigo-400 font-bold font-mono">{expScore.toFixed(0)}%</span>
                   </div>
-                  <div className="text-[11px] text-slate-500 mt-2">
-                    Weight: <span className="text-slate-300 font-semibold">30%</span>
-                  </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Contribution: <span className="text-purple-400 font-bold">{(((data?.scores?.semantic_score ?? 75) * 0.3)).toFixed(1)} pts</span>
-                  </div>
-                </div>
-
-                {/* Experience Score (20%) */}
-                <div className="bg-slate-950 border border-slate-800 rounded-xl p-3.5">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="flex items-center space-x-1 font-semibold text-slate-300">
-                      <Briefcase className="w-3.5 h-3.5 text-blue-400" />
-                      <span>Experience Score</span>
-                    </span>
-                    <span className="text-blue-400 font-bold">{data?.scores?.experience_score ?? 100}%</span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 mt-2">
-                    Weight: <span className="text-slate-300 font-semibold">20%</span>
-                  </div>
-                  <div className="text-[11px] text-slate-400 mt-0.5">
-                    Contribution: <span className="text-blue-400 font-bold">{(((data?.scores?.experience_score ?? 100) * 0.2)).toFixed(1)} pts</span>
+                  <div className="flex justify-between text-[11px] text-zinc-400 pt-1 border-t border-zinc-800/50">
+                    <span>Weight: <strong className="text-zinc-200">30%</strong></span>
+                    <span>Contribution: <strong className="text-indigo-300 font-mono">+{expContribution} pts</strong></span>
                   </div>
                 </div>
               </div>
 
-              {/* Skills Verification Breakdown */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Required & Optional Skills Audit
-                </h3>
-
+              {/* Matched vs Missing Skills */}
+              <div className="space-y-4 pt-1">
                 {/* Matched Skills */}
                 <div className="space-y-2">
-                  <div className="text-xs text-emerald-400 font-semibold flex items-center space-x-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    <span>Matched Skills ({data?.skills_breakdown?.matched?.length || 0})</span>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <span>Matched Skills</span>
+                    <span className="text-zinc-500 font-mono text-[11px]">
+                      ({data?.matched_skills?.length || 0})
+                    </span>
                   </div>
+
                   <div className="flex flex-wrap gap-2">
-                    {data?.skills_breakdown?.matched?.map((s, idx) => (
-                      <div
-                        key={idx}
-                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs font-medium"
-                      >
-                        <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                        <span>{s.skill_name}</span>
-                        {s.candidate_years && (
-                          <span className="text-[10px] text-emerald-400/70 font-mono">({s.candidate_years} yrs)</span>
-                        )}
-                      </div>
-                    ))}
-                    {(!data?.skills_breakdown?.matched || data.skills_breakdown.matched.length === 0) && (
-                      <span className="text-xs text-slate-500 italic">No matching skills found</span>
+                    {data?.matched_skills && data.matched_skills.length > 0 ? (
+                      data.matched_skills.map((s, idx) => (
+                        <Badge key={idx} variant="matched" className="py-1 px-2.5 gap-1.5">
+                          <span>✓</span>
+                          <span>{s.skill_name}</span>
+                          {s.proficiency && (
+                            <span className="text-[10px] text-emerald-400/80 font-mono">
+                              ({s.proficiency})
+                            </span>
+                          )}
+                        </Badge>
+                      ))
+                    ) : (
+                      <span className="text-xs text-zinc-500 italic">No matching skills found.</span>
                     )}
                   </div>
                 </div>
 
-                {/* Missing Required Skills */}
-                <div className="space-y-2 pt-2 border-t border-slate-800">
-                  <div className="text-xs text-rose-400 font-semibold flex items-center space-x-1">
-                    <XCircle className="w-3.5 h-3.5" />
-                    <span>Missing Required Skills ({data?.skills_breakdown?.missing_required?.length || 0})</span>
+                {/* Missing Skills */}
+                <div className="space-y-2">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-300">
+                    <XCircle className="w-4 h-4 text-rose-400" />
+                    <span>Missing Required Skills</span>
+                    <span className="text-zinc-500 font-mono text-[11px]">
+                      ({data?.missing_skills?.length || 0})
+                    </span>
                   </div>
+
                   <div className="flex flex-wrap gap-2">
-                    {data?.skills_breakdown?.missing_required?.map((s, idx) => (
-                      <div
-                        key={idx}
-                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-xs font-medium"
-                      >
-                        <XCircle className="w-3 h-3 text-rose-400" />
-                        <span>{s.skill_name}</span>
-                        {s.required_years && (
-                          <span className="text-[10px] text-rose-400/70 font-mono">(Req: {s.required_years} yrs)</span>
-                        )}
-                      </div>
-                    ))}
-                    {(!data?.skills_breakdown?.missing_required || data.skills_breakdown.missing_required.length === 0) && (
-                      <span className="text-xs text-slate-500 italic">None — candidate meets all required skills!</span>
+                    {data?.missing_skills && data.missing_skills.length > 0 ? (
+                      data.missing_skills.map((s, idx) => (
+                        <Badge key={idx} variant="missing" className="py-1 px-2.5 gap-1.5">
+                          <span className="text-rose-400">✕</span>
+                          <span>{s.skill_name}</span>
+                          {s.is_required && (
+                            <span className="text-[9px] uppercase font-mono text-amber-400 font-bold">
+                              Required
+                            </span>
+                          )}
+                        </Badge>
+                      ))
+                    ) : (
+                      <Badge variant="success" className="text-xs">
+                        All required job skills are satisfied!
+                      </Badge>
                     )}
                   </div>
                 </div>
@@ -195,14 +202,11 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
           )}
         </div>
 
-        {/* Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-slate-900/90 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold"
-          >
-            Close
-          </button>
+        {/* Modal Footer */}
+        <div className="px-6 py-4 border-t border-zinc-800 bg-zinc-950/60 flex justify-end">
+          <Button variant="secondary" size="sm" onClick={onClose}>
+            Close Breakdown
+          </Button>
         </div>
       </div>
     </div>

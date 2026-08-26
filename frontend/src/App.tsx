@@ -4,14 +4,16 @@ import { Navbar } from './components/Navbar';
 import { DashboardView } from './components/DashboardView';
 import { ApplicationsView } from './components/ApplicationsView';
 import { RankingView } from './components/RankingView';
+import { CandidateResumeView } from './components/CandidateResumeView';
 import { CreateJobModal } from './components/CreateJobModal';
 import { ExplainMatchModal } from './components/ExplainMatchModal';
 import { StatusHistoryModal } from './components/StatusHistoryModal';
+import { BackgroundGrid } from './components/ui/BackgroundGrid';
 import { Recruiter, JobSummaryStats, Application, RankedCandidate } from './types';
 import { api } from './services/api';
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'jobs' | 'applications' | 'ranking'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'jobs' | 'applications' | 'ranking' | 'candidate'>('dashboard');
   const [currentRecruiterId, setCurrentRecruiterId] = useState<number>(1);
   const [recruiter, setRecruiter] = useState<Recruiter | null>(null);
   const [jobs, setJobs] = useState<JobSummaryStats[]>([]);
@@ -59,7 +61,7 @@ export function App() {
         user_id: recruiterId === 1 ? 5 : 6,
         name: recruiterId === 1 ? 'Diana Recruiter' : 'Evan Recruiter',
         email: recruiterId === 1 ? 'diana@example.com' : 'evan@example.com',
-        company_name: recruiterId === 1 ? 'TechCorp' : 'InnovateLLC',
+        company_name: recruiterId === 1 ? 'TechCorp Solutions' : 'InnovateLLC',
         designation: recruiterId === 1 ? 'Senior Technical Recruiter' : 'Talent Acquisition Lead',
         created_at: new Date().toISOString(),
       };
@@ -69,8 +71,10 @@ export function App() {
         {
           job_id: 1,
           recruiter_id: recruiterId,
-          job_title: 'Senior Backend Developer',
-          job_status: 'open',
+          title: 'Senior Backend Developer',
+          location: 'San Francisco, CA',
+          experience_required_years: 4.0,
+          status: 'open',
           created_at: new Date().toISOString(),
           total_applications: 3,
           pending_applications: 1,
@@ -82,8 +86,10 @@ export function App() {
         {
           job_id: 2,
           recruiter_id: recruiterId,
-          job_title: 'Frontend UI Specialist',
-          job_status: 'open',
+          title: 'Frontend UI Specialist',
+          location: 'Remote',
+          experience_required_years: 3.0,
+          status: 'open',
           created_at: new Date().toISOString(),
           total_applications: 2,
           pending_applications: 1,
@@ -125,9 +131,8 @@ export function App() {
           application_status: 'shortlisted',
           applied_at: new Date().toISOString(),
           skill_score: 100,
-          semantic_score: 85,
           experience_score: 100,
-          final_score: 95.5,
+          match_score: 100.0,
         },
         {
           application_id: 4,
@@ -139,9 +144,8 @@ export function App() {
           application_status: 'rejected',
           applied_at: new Date().toISOString(),
           skill_score: 50,
-          semantic_score: 70,
           experience_score: 75,
-          final_score: 61.0,
+          match_score: 57.5,
         },
       ];
       setApplications(mockApps);
@@ -150,24 +154,24 @@ export function App() {
         {
           candidate_id: 1,
           candidate_name: 'Alice Candidate',
-          email: 'alice@example.com',
+          candidate_email: 'alice@example.com',
           location: 'New York, NY',
           skill_score: 100,
-          semantic_score: 85,
           experience_score: 100,
-          final_score: 95.5,
+          final_score: 100.0,
           application_status: 'shortlisted',
+          years_experience: 5.0,
         },
         {
           candidate_id: 3,
           candidate_name: 'Charlie Candidate',
-          email: 'charlie@example.com',
+          candidate_email: 'charlie@example.com',
           location: 'Austin, TX',
           skill_score: 50,
-          semantic_score: 70,
           experience_score: 75,
-          final_score: 61.0,
+          final_score: 57.5,
           application_status: 'rejected',
+          years_experience: 3.0,
         },
       ];
       setRankedCandidates(mockRanked);
@@ -195,19 +199,24 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Navigation */}
-      <Navbar
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        openCreateModal={() => setIsCreateModalOpen(true)}
-        currentRecruiter={recruiter}
-        onSwitchRecruiter={(id) => setCurrentRecruiterId(id)}
-        dbStatus={dbStatus}
-      />
+    <div className="relative min-h-screen bg-[#07080b] text-zinc-100 flex flex-col font-sans selection:bg-zinc-800 selection:text-white pb-12">
+      {/* Subtle Background Lighting & Grid */}
+      <BackgroundGrid />
 
-      {/* Main View Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Floating Pill Navigation */}
+      <div className="relative z-20">
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          openCreateModal={() => setIsCreateModalOpen(true)}
+          currentRecruiter={recruiter}
+          onSwitchRecruiter={(id) => setCurrentRecruiterId(id)}
+          dbStatus={dbStatus}
+        />
+      </div>
+
+      {/* Main View Container */}
+      <main className="relative z-10 flex-1 w-full max-w-7xl mx-auto py-2">
         {activeTab === 'dashboard' && (
           <DashboardView
             recruiter={recruiter}
@@ -247,6 +256,8 @@ export function App() {
             onExplainMatch={(jobId, candidateId) => setExplainCandidate({ jobId, candidateId })}
           />
         )}
+
+        {activeTab === 'candidate' && <CandidateResumeView />}
       </main>
 
       {/* Modals */}

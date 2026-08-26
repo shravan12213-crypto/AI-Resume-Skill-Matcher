@@ -122,7 +122,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/matching/job/${jobId}/top-candidates?limit=${limit}`);
       const json = await res.json();
-      return json.data;
+      return json.data || [];
     } catch {
       return [
         {
@@ -131,9 +131,8 @@ export const api = {
           email: 'alice@example.com',
           location: 'New York, NY',
           skill_score: 100,
-          semantic_score: 85,
           experience_score: 100,
-          final_score: 95.5,
+          final_score: 100.0,
           application_status: 'shortlisted',
         },
         {
@@ -142,9 +141,8 @@ export const api = {
           email: 'charlie@example.com',
           location: 'Austin, TX',
           skill_score: 50,
-          semantic_score: 70,
           experience_score: 75,
-          final_score: 61.0,
+          final_score: 57.5,
           application_status: 'rejected',
         },
       ];
@@ -166,41 +164,119 @@ export const api = {
           job_title: 'Senior Backend Developer',
           experience_required: 4.0,
           skill_score: isAlice ? 100.0 : 50.0,
-          semantic_score: isAlice ? 85.0 : 70.0,
           experience_score: isAlice ? 100.0 : 75.0,
-          final_score: isAlice ? 95.5 : 61.0,
+          final_score: isAlice ? 100.0 : 57.5,
           matched_at: new Date().toISOString(),
         },
         formula_weights: {
-          skill_weight: '50%',
-          semantic_weight: '30%',
-          experience_weight: '20%',
+          skill_weight: '70%',
+          experience_weight: '30%',
         },
-        skills_breakdown: {
-          total_job_skills: 3,
-          matched_skills_count: isAlice ? 3 : 1,
-          missing_required_count: isAlice ? 0 : 1,
-          matched: isAlice
-            ? [
-                { skill_name: 'Python', category: 'Programming', is_required: true, required_years: 4.0, candidate_years: 5.0 },
-                { skill_name: 'SQL', category: 'Database', is_required: true, required_years: 3.0, candidate_years: 4.0 },
-                { skill_name: 'PostgreSQL', category: 'Database', is_required: false, required_years: 2.0, candidate_years: 5.0 },
-              ]
-            : [
-                { skill_name: 'Python', category: 'Programming', is_required: true, required_years: 4.0, candidate_years: 3.0 },
-              ],
-          missing_required: isAlice
-            ? []
-            : [
-                { skill_name: 'SQL', category: 'Database', is_required: true, required_years: 3.0 },
-              ],
-          missing_optional: isAlice
-            ? []
-            : [
-                { skill_name: 'PostgreSQL', category: 'Database', is_required: false, required_years: 2.0 },
-              ],
-        },
+        matched_skills: isAlice
+          ? [
+              { skill_name: 'Python', proficiency: 'expert' },
+              { skill_name: 'SQL', proficiency: 'intermediate' },
+              { skill_name: 'PostgreSQL', proficiency: 'expert' },
+            ]
+          : [{ skill_name: 'Python', proficiency: 'beginner' }],
+        missing_skills: isAlice
+          ? []
+          : [
+              { skill_name: 'SQL', is_required: true },
+              { skill_name: 'PostgreSQL', is_required: false },
+            ],
+      };
+    }
+  },
+
+  // Candidates & AI Resume Extraction
+  getCandidateProfile: async (candidateId: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/candidates/${candidateId}`);
+      const json = await res.json();
+      return json.data;
+    } catch {
+      return {
+        candidate_id: candidateId,
+        user_id: candidateId,
+        name: candidateId === 1 ? 'Alice Candidate' : candidateId === 2 ? 'Bob Developer' : 'Charlie Candidate',
+        email: candidateId === 1 ? 'alice@example.com' : candidateId === 2 ? 'bob@example.com' : 'charlie@example.com',
+        phone: '+1 (555) 019-2834',
+        location: candidateId === 1 ? 'New York, NY' : candidateId === 2 ? 'Seattle, WA' : 'Austin, TX',
+        summary: candidateId === 1 ? 'Senior Backend Engineer specializing in PostgreSQL performance tuning, SQL stored procedures, and distributed caching.' : 'Full stack developer with focus on React and Node.js microservices.',
+        created_at: new Date().toISOString(),
+      };
+    }
+  },
+
+  getCandidateResumes: async (candidateId: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/candidates/${candidateId}/resumes`);
+      const json = await res.json();
+      return json.data || [];
+    } catch {
+      return [
+        {
+          resume_id: candidateId === 1 ? 101 : 102,
+          candidate_id: candidateId,
+          file_name: candidateId === 1 ? 'alice_senior_backend_resume.pdf' : 'bob_developer_cv.pdf',
+          file_url: 'https://storage.skillmatch.dev/resumes/demo.pdf',
+          raw_text: 'Alice Candidate\nSenior Backend Engineer\n\nExperience:\n- Senior Backend Architect at CloudCorp (4 years): Optimized PostgreSQL queries, designed PL/pgSQL stored procedures, and maintained 99.99% uptime.\n- Software Engineer at DataTech (2 years): Built RESTful APIs in Node.js & TypeScript.\n\nEducation:\n- Master of Science in Computer Science, Stanford University (2018 - 2020)\n- Bachelor of Science in Computer Science, UC Berkeley (2014 - 2018)\n\nSkills: PostgreSQL, SQL, Python, Node.js, Docker, Redis, Git',
+          uploaded_at: new Date().toISOString(),
+        }
+      ];
+    }
+  },
+
+  createResume: async (candidateId: number, data: { file_name: string; file_url: string; raw_text?: string }) => {
+    try {
+      const res = await fetch(`${API_BASE}/candidates/${candidateId}/resumes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || 'Failed to upload resume');
+      return json.data;
+    } catch {
+      return {
+        resume_id: Date.now(),
+        candidate_id: candidateId,
+        file_name: data.file_name,
+        file_url: data.file_url,
+        raw_text: data.raw_text || '',
+        uploaded_at: new Date().toISOString(),
+      };
+    }
+  },
+
+  extractResumeData: async (candidateId: number, resumeId: number) => {
+    try {
+      const res = await fetch(`${API_BASE}/candidates/${candidateId}/resumes/${resumeId}/extract`, {
+        method: 'POST',
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || 'AI extraction failed');
+      return json.data;
+    } catch {
+      return {
+        education: [
+          { degree: 'Master of Science', field: 'Computer Science', institution: 'Stanford University', start_year: 2018, end_year: 2020 },
+          { degree: 'Bachelor of Science', field: 'Computer Science', institution: 'UC Berkeley', start_year: 2014, end_year: 2018 },
+        ],
+        experience: [
+          { role: 'Senior Backend Architect', company: 'CloudCorp', years: 4 },
+          { role: 'Software Engineer', company: 'DataTech', years: 2 },
+        ],
+        projects: [
+          { name: 'SQL Query Optimizer', description: 'Engineered query execution planner analyzer in Node.js' }
+        ],
+        certifications: [
+          { name: 'PostgreSQL Certified Professional' }
+        ],
+        skills: ['PostgreSQL', 'SQL', 'Python', 'Node.js', 'Docker', 'Redis', 'Git'],
       };
     }
   },
 };
+

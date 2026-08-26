@@ -1,7 +1,23 @@
 // frontend/src/components/DashboardView.tsx
 import React from 'react';
-import { Briefcase, Users, CheckCircle2, TrendingUp, ArrowRight, PlusCircle, Sparkles, MapPin, Clock } from 'lucide-react';
+import {
+  Briefcase,
+  Users,
+  CheckCircle2,
+  TrendingUp,
+  ArrowUpRight,
+  Plus,
+  Sparkles,
+  MapPin,
+  Clock,
+  Layers,
+  Database,
+  Search
+} from 'lucide-react';
 import { JobSummaryStats, Recruiter } from '../types';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/Card';
+import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
 
 interface DashboardViewProps {
   recruiter: Recruiter | null;
@@ -23,155 +39,189 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
   const avgScores = jobs.filter((j) => j.avg_match_score !== null).map((j) => Number(j.avg_match_score));
   const overallAvgScore = avgScores.length
     ? (avgScores.reduce((a, b) => a + b, 0) / avgScores.length).toFixed(1)
-    : '85.0';
+    : '84.5';
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Welcome Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl glass-panel p-6 sm:p-8 border border-slate-800 bg-gradient-to-r from-indigo-950/40 via-slate-900/60 to-purple-950/40">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-semibold mb-3">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>DBMS Recruiter Intelligence Hub</span>
+    <div className="space-y-8 animate-fadeIn max-w-7xl mx-auto px-4 sm:px-6">
+      {/* Bento Hero Section */}
+      <div className="relative rounded-3xl border border-zinc-800/80 bg-zinc-950/70 p-6 sm:p-10 backdrop-blur-xl overflow-hidden">
+        {/* Subtle decorative glow */}
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium text-zinc-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>In-Database PL/pgSQL Matching Engine</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Welcome back, {recruiter?.name || 'Diana'}
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white font-display">
+              Welcome, {recruiter?.name || 'Recruiter'}
             </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-xl">
-              Manage postings for <span className="text-indigo-400 font-semibold">{recruiter?.company_name || 'TechCorp'}</span>, track candidate submissions, and inspect explainable SQL + pgvector matching scores.
+            <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
+              Monitoring talent pipelines for <span className="text-zinc-100 font-semibold">{recruiter?.company_name || 'TechCorp'}</span>. Candidate ranking and scoring are computed deterministically inside PostgreSQL (70% Skill + 30% Experience).
             </p>
           </div>
 
-          <button
-            onClick={openCreateModal}
-            className="flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium text-sm shadow-xl shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <PlusCircle className="w-4 h-4" />
-            <span>Create New Job Posting</span>
-          </button>
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <Button onClick={openCreateModal} className="h-11 px-5 shadow-lg whitespace-nowrap flex-shrink-0">
+              <Plus className="w-4 h-4 mr-2" />
+              <span>Post New Position</span>
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* 4 Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="glass-panel p-5 rounded-xl border border-slate-800/80 hover:border-indigo-500/30 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Active Jobs</span>
-            <div className="w-10 h-10 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-              <Briefcase className="w-5 h-5" />
+      {/* 4 Clean Metric Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:border-zinc-700/80 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardDescription className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+              Active Postings
+            </CardDescription>
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+              <Briefcase className="w-4 h-4" />
             </div>
-          </div>
-          <div className="text-3xl font-bold text-white mt-3">{totalJobs}</div>
-          <div className="text-xs text-slate-400 mt-1 flex items-center space-x-1">
-            <span className="text-emerald-400 font-medium">100% open</span>
-            <span>in PostgreSQL</span>
-          </div>
-        </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-white font-display">{totalJobs}</div>
+            <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+              <span>●</span> In `jobs` table
+            </p>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel p-5 rounded-xl border border-slate-800/80 hover:border-blue-500/30 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Total Applicants</span>
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-              <Users className="w-5 h-5" />
+        <Card className="hover:border-zinc-700/80 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardDescription className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+              Total Applicants
+            </CardDescription>
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+              <Users className="w-4 h-4" />
             </div>
-          </div>
-          <div className="text-3xl font-bold text-white mt-3">{totalApplications}</div>
-          <div className="text-xs text-slate-400 mt-1">Across all active postings</div>
-        </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-white font-display">{totalApplications}</div>
+            <p className="text-xs text-zinc-500 mt-1">Across all open pipelines</p>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel p-5 rounded-xl border border-slate-800/80 hover:border-emerald-500/30 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Shortlisted</span>
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5" />
+        <Card className="hover:border-zinc-700/80 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardDescription className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+              Shortlisted
+            </CardDescription>
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+              <CheckCircle2 className="w-4 h-4" />
             </div>
-          </div>
-          <div className="text-3xl font-bold text-emerald-400 mt-3">{totalShortlisted}</div>
-          <div className="text-xs text-slate-400 mt-1">Candidates in shortlist queue</div>
-        </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-emerald-400 font-display">{totalShortlisted}</div>
+            <p className="text-xs text-zinc-500 mt-1">Qualified via SQL rules</p>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel p-5 rounded-xl border border-slate-800/80 hover:border-purple-500/30 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Avg Match Score</span>
-            <div className="w-10 h-10 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5" />
+        <Card className="hover:border-zinc-700/80 transition-colors">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardDescription className="font-mono text-xs uppercase tracking-wider text-zinc-400">
+              Average Match
+            </CardDescription>
+            <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+              <TrendingUp className="w-4 h-4" />
             </div>
-          </div>
-          <div className="text-3xl font-bold text-purple-400 mt-3">{overallAvgScore}%</div>
-          <div className="text-xs text-slate-400 mt-1">50/30/20 SQL formula</div>
-        </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-indigo-300 font-display">{overallAvgScore}%</div>
+            <p className="text-xs text-zinc-500 mt-1">From `recruiter_job_summary_view`</p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Active Jobs Section */}
+      {/* Mainline Job Positions Table / Bento Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-white">Your Job Postings & Live Metrics</h2>
-            <p className="text-xs text-slate-400">Sourced directly from <code className="text-indigo-400">recruiter_job_summary_view</code></p>
+            <h2 className="text-xl font-bold text-white font-display">Active Job Openings</h2>
+            <p className="text-xs text-zinc-400">Select a position to inspect real-time SQL candidate rankings or review applicants.</p>
           </div>
+          <Badge variant="outline" className="font-mono text-[11px]">
+            {jobs.length} Positions Available
+          </Badge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {jobs.map((job) => (
-            <div
+            <Card
               key={job.job_id}
-              className="glass-panel-interactive rounded-xl p-5 flex flex-col justify-between border border-slate-800"
+              className="group hover:border-zinc-700 transition-all duration-200 flex flex-col justify-between"
             >
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-bold text-base text-white hover:text-indigo-400 transition-colors">
-                    {job.job_title}
-                  </h3>
-                  <span
-                    className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
-                      job.job_status === 'open'
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    }`}
+              <CardHeader className="pb-3">
+                <div className="flex items-start justify-between gap-2">
+                  <Badge
+                    variant={job.status === 'open' ? 'success' : 'secondary'}
+                    className="capitalize text-[11px]"
                   >
-                    {job.job_status}
+                    {job.status}
+                  </Badge>
+                  <span className="text-[11px] font-mono text-zinc-500">#{job.job_id}</span>
+                </div>
+                <CardTitle className="text-base font-semibold text-zinc-100 group-hover:text-white mt-2">
+                  {job.title}
+                </CardTitle>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-zinc-400 pt-1">
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-zinc-500" />
+                    {job.location || 'Remote'}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-zinc-500" />
+                    {job.experience_required_years}y min exp
                   </span>
                 </div>
+              </CardHeader>
 
-                {/* Job Stats Pill Grid */}
-                <div className="grid grid-cols-3 gap-2 mt-4 text-center">
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-2">
-                    <div className="text-xs text-slate-400">Applicants</div>
-                    <div className="text-sm font-bold text-white mt-0.5">{job.total_applications}</div>
+              <CardContent className="pt-0 space-y-4">
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/60 text-center">
+                  <div>
+                    <div className="text-xs font-bold text-zinc-200">{job.total_applications}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase">Applicants</div>
                   </div>
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-2">
-                    <div className="text-xs text-slate-400">Shortlisted</div>
-                    <div className="text-sm font-bold text-emerald-400 mt-0.5">{job.shortlisted_count}</div>
+                  <div>
+                    <div className="text-xs font-bold text-emerald-400">{job.shortlisted_count}</div>
+                    <div className="text-[10px] text-zinc-500 uppercase">Shortlisted</div>
                   </div>
-                  <div className="bg-slate-900/80 border border-slate-800 rounded-lg p-2">
-                    <div className="text-xs text-slate-400">Avg Match</div>
-                    <div className="text-sm font-bold text-indigo-400 mt-0.5">
-                      {job.avg_match_score ? `${job.avg_match_score}%` : 'N/A'}
+                  <div>
+                    <div className="text-xs font-bold text-indigo-300">
+                      {job.avg_match_score ? `${Math.round(Number(job.avg_match_score))}%` : '—'}
                     </div>
+                    <div className="text-[10px] text-zinc-500 uppercase">Avg Match</div>
                   </div>
                 </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="pt-5 mt-5 border-t border-slate-800/80 flex items-center justify-between gap-2">
-                <button
-                  onClick={() => onSelectJob(job.job_id, 'applications')}
-                  className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-xs font-semibold text-slate-200 border border-slate-700 transition-colors"
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  <span>Applicants ({job.total_applications})</span>
-                </button>
+                {/* Actions */}
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onSelectJob(job.job_id, 'ranking')}
+                    className="w-full text-xs"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1 text-zinc-400" />
+                    <span>Rankings</span>
+                  </Button>
 
-                <button
-                  onClick={() => onSelectJob(job.job_id, 'ranking')}
-                  className="flex-1 flex items-center justify-center space-x-1 px-3 py-2 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-xs font-semibold text-indigo-300 border border-indigo-500/30 transition-colors"
-                >
-                  <TrendingUp className="w-3.5 h-3.5" />
-                  <span>Rank Matches</span>
-                </button>
-              </div>
-            </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => onSelectJob(job.job_id, 'applications')}
+                    className="w-full text-xs"
+                  >
+                    <Users className="w-3.5 h-3.5 mr-1" />
+                    <span>Applicants</span>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

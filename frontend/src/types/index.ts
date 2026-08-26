@@ -33,8 +33,12 @@ export interface Job {
 export interface JobSummaryStats {
   job_id: number;
   recruiter_id: number;
-  job_title: string;
-  job_status: 'open' | 'closed';
+  job_title?: string;
+  title?: string;
+  job_status?: 'open' | 'closed';
+  status?: 'open' | 'closed';
+  location?: string;
+  experience_required_years?: number;
   created_at: string;
   total_applications: number;
   pending_applications: number;
@@ -58,9 +62,9 @@ export interface Application {
   application_status: 'applied' | 'shortlisted' | 'rejected' | 'hired';
   applied_at: string;
   skill_score?: number;
-  semantic_score?: number;
   experience_score?: number;
   final_score?: number;
+  match_score?: number;
 }
 
 export interface StatusHistory {
@@ -74,12 +78,13 @@ export interface StatusHistory {
 export interface RankedCandidate {
   candidate_id: number;
   candidate_name: string;
-  email: string;
+  email?: string;
+  candidate_email?: string;
   location?: string;
   skill_score: number;
-  semantic_score: number;
   experience_score: number;
   final_score: number;
+  years_experience?: number;
   application_status?: string;
 }
 
@@ -88,7 +93,6 @@ export interface ExplainableMatch {
   job_id: number;
   scores: {
     skill_score: number;
-    semantic_score: number;
     experience_score: number;
     final_score: number;
     matched_at: string;
@@ -98,10 +102,11 @@ export interface ExplainableMatch {
   } | null;
   formula_weights: {
     skill_weight: string;
-    semantic_weight: string;
     experience_weight: string;
   };
-  skills_breakdown: {
+  matched_skills?: { skill_name: string; proficiency?: string }[];
+  missing_skills?: { skill_name: string; is_required?: boolean }[];
+  skills_breakdown?: {
     total_job_skills: number;
     matched_skills_count: number;
     missing_required_count: number;
@@ -110,3 +115,4 @@ export interface ExplainableMatch {
     missing_optional: any[];
   };
 }
+

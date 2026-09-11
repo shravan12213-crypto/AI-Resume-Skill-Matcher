@@ -12,7 +12,9 @@ import {
   Loader2,
   Play,
   User,
-  Plus
+  Plus,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Button } from './ui/Button';
@@ -29,13 +31,20 @@ export const CandidateResumeView: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [newResumeText, setNewResumeText] = useState('');
   const [newResumeFileName, setNewResumeFileName] = useState('');
+  const [newResumeFileUrl, setNewResumeFileUrl] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editForm, setEditForm] = useState({ phone: '', location: '', summary: '' });
+  const [error, setError] = useState<string | null>(null);
+  const [candidateIdInput, setCandidateIdInput] = useState('1');
 
   const loadCandidateData = async (cid: number) => {
     setLoading(true);
+    setError(null);
     try {
       const p = await api.getCandidateProfile(cid);
       setProfile(p);
+      setEditForm({ phone: p?.phone || '', location: p?.location || '', summary: p?.summary || '' });
       const r = await api.getCandidateResumes(cid);
       setResumes(r);
       if (r.length > 0) {
@@ -44,8 +53,12 @@ export const CandidateResumeView: React.FC = () => {
         setSelectedResume(null);
       }
       setExtractedResult(null);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load candidate profile');
+      setProfile(null);
+      setResumes([]);
+      setSelectedResume(null);
+      setExtractedResult(null);
     } finally {
       setLoading(false);
     }
@@ -54,6 +67,29 @@ export const CandidateResumeView: React.FC = () => {
   useEffect(() => {
     loadCandidateData(candidateId);
   }, [candidateId]);
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const p = await api.updateCandidateProfile(candidateId, editForm);
+      setProfile(p);
+      setIsEditingProfile(false);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update profile');
+    }
+  };
+
+  const handleDeleteResume = async (resumeId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm('Are you sure you want to delete this resume?')) return;
+    try {
+      await api.deleteResume(candidateId, resumeId);
+      if (selectedResume?.resume_id === resumeId) setSelectedResume(null);
+      await loadCandidateData(candidateId);
+    } catch (err: any) {
+      alert(err.message || 'Failed to delete resume');
+    }
+  };
 
   const handleExtract = async () => {
     if (!selectedResume) return;
@@ -73,15 +109,19 @@ export const CandidateResumeView: React.FC = () => {
 
   const handleCreateResume = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newResumeFileName.trim()) return;
+    if (!newResumeFileName.trim() || !newResumeFileUrl.trim()) {
+      alert('File name and File URL are required');
+      return;
+    }
     setUploading(true);
     try {
       await api.createResume(candidateId, {
         file_name: newResumeFileName,
-        file_url: `https://storage.skillmatch.dev/resumes/${newResumeFileName}`,
-        raw_text: newResumeText || 'Alice Candidate\nSenior Backend Engineer\nSkills: Python, PostgreSQL, Redis, Docker\nExperience: 5 years at CloudCorp building relational backend services\nEducation: BS in Computer Science from MIT',
+        file_url: newResumeFileUrl,
+        raw_text: newResumeText.trim() || undefined,
       });
       setNewResumeFileName('');
+      setNewResumeFileUrl('');
       setNewResumeText('');
       await loadCandidateData(candidateId);
     } catch (err: any) {
@@ -112,23 +152,33 @@ export const CandidateResumeView: React.FC = () => {
 
           {/* Candidate Switcher */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-zinc-400 font-mono">Candidate ID:</span>
-            {[1, 2, 3].map((id) => (
-              <button
-                key={id}
-                onClick={() => setCandidateId(id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-all ${
-                  candidateId === id
-                    ? 'bg-zinc-100 text-zinc-950 font-bold shadow'
-                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-                }`}
-              >
-                #{id}
-              </button>
-            ))}
+            <span className="text-xs text-zinc-400 font-mono">Demo Candidate ID:</span>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const id = parseInt(candidateIdInput, 10);
+                if (!isNaN(id)) setCandidateId(id);
+              }}
+              className="flex items-center gap-2"
+            >
+              <input
+                type="number"
+                min="1"
+                value={candidateIdInput}
+                onChange={(e) => setCandidateIdInput(e.target.value)}
+                className="w-16 px-2 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs text-center font-mono"
+              />
+              <Button type="submit" size="sm" className="h-7 px-3 text-[10px]">Load</Button>
+            </form>
           </div>
         </div>
       </div>
+
+      {error && (
+        <div className="p-4 bg-red-950/50 border border-red-900/50 rounded-2xl text-red-400 text-sm flex items-center justify-center">
+          {error}
+        </div>
+      )}
 
       {loading ? (
         <div className="py-16 text-center text-zinc-500">
@@ -147,20 +197,53 @@ export const CandidateResumeView: React.FC = () => {
                   <Badge variant="outline" className="font-mono text-[10px]">
                     Candidate Profile
                   </Badge>
-                  <span className="text-xs text-zinc-500 font-mono">ID: #{profile?.candidate_id || candidateId}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-zinc-500 font-mono">ID: #{profile?.candidate_id || candidateId}</span>
+                    <button onClick={() => setIsEditingProfile(!isEditingProfile)} className="text-zinc-400 hover:text-white">
+                      <Edit2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
                 <CardTitle className="text-lg text-white mt-2">
                   {profile?.name || `Candidate #${candidateId}`}
                 </CardTitle>
-                <CardDescription className="text-xs text-zinc-400">
-                  {profile?.email || 'email@example.com'} • {profile?.location || 'Location not set'}
-                </CardDescription>
+                {!isEditingProfile && (
+                  <CardDescription className="text-xs text-zinc-400">
+                    {profile?.email || 'email@example.com'} • {profile?.phone || 'No phone'} • {profile?.location || 'Location not set'}
+                  </CardDescription>
+                )}
               </CardHeader>
               <CardContent className="space-y-3 pt-0 text-xs text-zinc-400">
-                {profile?.summary && (
-                  <p className="italic bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800/60">
-                    "{profile.summary}"
-                  </p>
+                {isEditingProfile ? (
+                  <form onSubmit={handleUpdateProfile} className="space-y-3">
+                    <input
+                      type="text"
+                      placeholder="Phone"
+                      value={editForm.phone}
+                      onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-100 text-xs placeholder-zinc-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Location"
+                      value={editForm.location}
+                      onChange={(e) => setEditForm({...editForm, location: e.target.value})}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-100 text-xs placeholder-zinc-500"
+                    />
+                    <textarea
+                      placeholder="Summary"
+                      value={editForm.summary}
+                      onChange={(e) => setEditForm({...editForm, summary: e.target.value})}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-100 text-xs placeholder-zinc-500 h-20"
+                    />
+                    <Button type="submit" size="sm" className="w-full text-xs">Save Profile</Button>
+                  </form>
+                ) : (
+                  profile?.summary && (
+                    <p className="italic bg-zinc-900/50 p-2.5 rounded-xl border border-zinc-800/60">
+                      "{profile.summary}"
+                    </p>
+                  )
                 )}
               </CardContent>
             </Card>
@@ -180,18 +263,28 @@ export const CandidateResumeView: React.FC = () => {
                     <div
                       key={r.resume_id}
                       onClick={() => setSelectedResume(r)}
-                      className={`p-3 rounded-xl border cursor-pointer transition-all ${
+                      className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col relative group ${
                         selectedResume?.resume_id === r.resume_id
                           ? 'bg-zinc-800/80 border-zinc-600 text-white shadow-sm'
                           : 'bg-zinc-900/40 border-zinc-800/80 text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200'
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-medium text-xs truncate max-w-[180px]">{r.file_name}</span>
-                        <Badge variant="secondary" className="text-[10px] font-mono">#{r.resume_id}</Badge>
+                        <span className="font-medium text-xs truncate max-w-[150px]">{r.file_name}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-[10px] font-mono">#{r.resume_id}</Badge>
+                          <button 
+                            onClick={(e) => handleDeleteResume(r.resume_id, e)}
+                            className="text-zinc-500 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                            title="Delete Resume"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
-                      <div className="text-[10px] text-zinc-500 mt-1 font-mono">
-                        {new Date(r.uploaded_at).toLocaleDateString()}
+                      <div className="text-[10px] text-zinc-500 mt-1 font-mono flex items-center justify-between">
+                        <span>{new Date(r.uploaded_at).toLocaleDateString()}</span>
+                        {r.raw_text && <span className="text-emerald-500/70">Raw Text</span>}
                       </div>
                     </div>
                   ))
@@ -199,13 +292,16 @@ export const CandidateResumeView: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Upload Test Resume */}
+            {/* Add Resume */}
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm text-zinc-200 flex items-center gap-1.5">
                   <Plus className="w-4 h-4 text-zinc-400" />
-                  <span>Upload Plaintext Resume</span>
+                  <span>Add External Resume</span>
                 </CardTitle>
+                <CardDescription className="text-[10px] text-zinc-500 mt-1">
+                  Provide a link to your resume and its text content for parsing.
+                </CardDescription>
               </CardHeader>
               <CardContent className="pt-0">
                 <form onSubmit={handleCreateResume} className="space-y-3 text-xs">
@@ -220,6 +316,16 @@ export const CandidateResumeView: React.FC = () => {
                     />
                   </div>
                   <div>
+                    <input
+                      type="url"
+                      required
+                      placeholder="File URL (e.g. https://storage/resume.pdf)"
+                      value={newResumeFileUrl}
+                      onChange={(e) => setNewResumeFileUrl(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-zinc-100 text-xs placeholder-zinc-500"
+                    />
+                  </div>
+                  <div>
                     <textarea
                       rows={4}
                       placeholder="Paste raw resume text here for AI extraction..."
@@ -229,7 +335,7 @@ export const CandidateResumeView: React.FC = () => {
                     />
                   </div>
                   <Button type="submit" size="sm" disabled={uploading} className="w-full text-xs">
-                    {uploading ? 'Uploading...' : 'Save New Resume'}
+                    {uploading ? 'Saving...' : 'Save External Resume'}
                   </Button>
                 </form>
               </CardContent>
@@ -336,6 +442,45 @@ export const CandidateResumeView: React.FC = () => {
                             ))
                           ) : (
                             <span className="text-zinc-600">No work experience extracted.</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Projects */}
+                      <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-2">
+                        <div className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                          <FolderGit2 className="w-4 h-4 text-indigo-400" />
+                          <span>Projects</span>
+                        </div>
+                        <div className="space-y-1 text-xs text-zinc-400 font-mono">
+                          {Array.isArray(extractedResult.projects) && extractedResult.projects.length > 0 ? (
+                            extractedResult.projects.map((proj: any, idx: number) => (
+                              <div key={idx} className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
+                                <div className="text-zinc-200 font-medium">{proj.name}</div>
+                                <div className="text-[11px] text-zinc-500">{proj.description}</div>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-zinc-600">No projects extracted.</span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Certifications */}
+                      <div className="p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800 space-y-2">
+                        <div className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                          <Award className="w-4 h-4 text-indigo-400" />
+                          <span>Certifications</span>
+                        </div>
+                        <div className="space-y-1 text-xs text-zinc-400 font-mono">
+                          {Array.isArray(extractedResult.certifications) && extractedResult.certifications.length > 0 ? (
+                            extractedResult.certifications.map((cert: any, idx: number) => (
+                              <div key={idx} className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/60">
+                                <div className="text-zinc-200 font-medium">{cert.name}</div>
+                              </div>
+                            ))
+                          ) : (
+                            <span className="text-zinc-600">No certifications extracted.</span>
                           )}
                         </div>
                       </div>

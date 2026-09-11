@@ -54,53 +54,11 @@ export function App() {
       if (recJobs.length > 0 && (!selectedJobId || !recJobs.some((j) => j.job_id === selectedJobId))) {
         setSelectedJobId(recJobs[0].job_id);
       }
-    } catch {
-      // Fallback mock state for standalone demo
-      const mockRecruiter: Recruiter = {
-        recruiter_id: recruiterId,
-        user_id: recruiterId === 1 ? 5 : 6,
-        name: recruiterId === 1 ? 'Diana Recruiter' : 'Evan Recruiter',
-        email: recruiterId === 1 ? 'diana@example.com' : 'evan@example.com',
-        company_name: recruiterId === 1 ? 'TechCorp Solutions' : 'InnovateLLC',
-        designation: recruiterId === 1 ? 'Senior Technical Recruiter' : 'Talent Acquisition Lead',
-        created_at: new Date().toISOString(),
-      };
-      setRecruiter(mockRecruiter);
-
-      const mockJobs: JobSummaryStats[] = [
-        {
-          job_id: 1,
-          recruiter_id: recruiterId,
-          title: 'Senior Backend Developer',
-          location: 'San Francisco, CA',
-          experience_required_years: 4.0,
-          status: 'open',
-          created_at: new Date().toISOString(),
-          total_applications: 3,
-          pending_applications: 1,
-          shortlisted_count: 1,
-          hired_count: 0,
-          rejected_count: 1,
-          avg_match_score: 87.5,
-        },
-        {
-          job_id: 2,
-          recruiter_id: recruiterId,
-          title: 'Frontend UI Specialist',
-          location: 'Remote',
-          experience_required_years: 3.0,
-          status: 'open',
-          created_at: new Date().toISOString(),
-          total_applications: 2,
-          pending_applications: 1,
-          shortlisted_count: 1,
-          hired_count: 0,
-          rejected_count: 0,
-          avg_match_score: 92.0,
-        },
-      ];
-      setJobs(mockJobs);
-      setSelectedJobId(1);
+    } catch (error) {
+      console.error('Failed to load recruiter data:', error);
+      setRecruiter(null);
+      setJobs([]);
+      setSelectedJobId(null);
     }
   };
 
@@ -118,63 +76,10 @@ export function App() {
 
       const ranked = await api.getTopCandidates(jobId);
       setRankedCandidates(ranked);
-    } catch {
-      // Mock candidates
-      const mockApps: Application[] = [
-        {
-          application_id: 1,
-          candidate_id: 1,
-          candidate_name: 'Alice Candidate',
-          candidate_email: 'alice@example.com',
-          location: 'New York, NY',
-          job_id: jobId,
-          application_status: 'shortlisted',
-          applied_at: new Date().toISOString(),
-          skill_score: 100,
-          experience_score: 100,
-          match_score: 100.0,
-        },
-        {
-          application_id: 4,
-          candidate_id: 3,
-          candidate_name: 'Charlie Candidate',
-          candidate_email: 'charlie@example.com',
-          location: 'Austin, TX',
-          job_id: jobId,
-          application_status: 'rejected',
-          applied_at: new Date().toISOString(),
-          skill_score: 50,
-          experience_score: 75,
-          match_score: 57.5,
-        },
-      ];
-      setApplications(mockApps);
-
-      const mockRanked: RankedCandidate[] = [
-        {
-          candidate_id: 1,
-          candidate_name: 'Alice Candidate',
-          candidate_email: 'alice@example.com',
-          location: 'New York, NY',
-          skill_score: 100,
-          experience_score: 100,
-          final_score: 100.0,
-          application_status: 'shortlisted',
-          years_experience: 5.0,
-        },
-        {
-          candidate_id: 3,
-          candidate_name: 'Charlie Candidate',
-          candidate_email: 'charlie@example.com',
-          location: 'Austin, TX',
-          skill_score: 50,
-          experience_score: 75,
-          final_score: 57.5,
-          application_status: 'rejected',
-          years_experience: 3.0,
-        },
-      ];
-      setRankedCandidates(mockRanked);
+    } catch (error) {
+      console.error('Failed to load job details:', error);
+      setApplications([]);
+      setRankedCandidates([]);
     }
   };
 
@@ -186,10 +91,9 @@ export function App() {
       await api.updateApplicationStatus(applicationId, status);
       if (selectedJobId) loadJobDetails(selectedJobId);
       loadRecruiterData(currentRecruiterId);
-    } catch {
-      setApplications(
-        applications.map((a) => (a.application_id === applicationId ? { ...a, application_status: status } : a))
-      );
+    } catch (error) {
+      console.error('Failed to update status:', error);
+      alert('Failed to update application status.');
     }
   };
 

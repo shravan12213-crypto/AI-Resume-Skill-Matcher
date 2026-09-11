@@ -93,7 +93,7 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                       Locked Weighting Formula
                     </span>
                     <div className="text-xs font-mono text-zinc-200 bg-zinc-900/80 px-2 py-1 rounded-lg border border-zinc-800">
-                      Final Score = (Skill Score × 0.50) + (Semantic Score × 0.30) + (Experience Score × 0.20)
+                      Final Score = (Skill Score * 0.50) + (Semantic Score * 0.30) + (Experience Score * 0.20)
                     </div>
                   </div>
                   <div className="text-right">
@@ -169,7 +169,7 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                     {data?.matched_skills && data.matched_skills.length > 0 ? (
                       data.matched_skills.map((s, idx) => (
                         <Badge key={idx} variant="matched" className="py-1 px-2.5 gap-1.5">
-                          <span>✓</span>
+                          <span>✅</span>
                           <span>{s.skill_name}</span>
                           {s.proficiency && (
                             <span className="text-[10px] text-emerald-400/80 font-mono">
@@ -198,7 +198,7 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                     {data?.missing_skills && data.missing_skills.length > 0 ? (
                       data.missing_skills.map((s, idx) => (
                         <Badge key={idx} variant="missing" className="py-1 px-2.5 gap-1.5">
-                          <span className="text-rose-400">✕</span>
+                          <span className="text-rose-400">❌</span>
                           <span>{s.skill_name}</span>
                           {s.is_required && (
                             <span className="text-[9px] uppercase font-mono text-amber-400 font-bold">

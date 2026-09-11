@@ -3,10 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
 import * as matchingService from '../services/matchingService';
 
-const CalculateSchema = z.object({
-  candidate_id: z.number().int().positive(),
-  job_id: z.number().int().positive(),
-});
+
 
 export const getTopCandidates = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -47,16 +44,4 @@ export const getExplainableMatch = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const calculateMatch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    const { candidate_id, job_id } = CalculateSchema.parse(req.body);
-    const result = await matchingService.calculateMatch(candidate_id, job_id);
-    res.json({
-      success: true,
-      message: 'Match score calculated and saved to database',
-      data: result,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+

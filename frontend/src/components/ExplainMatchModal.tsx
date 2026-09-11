@@ -48,9 +48,11 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
   const skillScore = Number(data?.scores?.skill_score || 0);
   const expScore = Number(data?.scores?.experience_score || 0);
   const finalScore = Number(data?.scores?.final_score || 0);
+  const semanticScore = Number(data?.scores?.semantic_score || 0);
 
-  const skillContribution = (skillScore * 0.7).toFixed(1);
-  const expContribution = (expScore * 0.3).toFixed(1);
+  const skillContribution = (skillScore * 0.5).toFixed(1);
+  const semanticContribution = (semanticScore * 0.3).toFixed(1);
+  const expContribution = (expScore * 0.2).toFixed(1);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/80 backdrop-blur-md animate-fadeIn">
@@ -91,7 +93,7 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                       Locked Weighting Formula
                     </span>
                     <div className="text-xs font-mono text-zinc-200 bg-zinc-900/80 px-2 py-1 rounded-lg border border-zinc-800">
-                      Final Score = (Skill Score × 0.70) + (Experience Score × 0.30)
+                      Final Score = (Skill Score × 0.50) + (Semantic Score × 0.30) + (Experience Score × 0.20)
                     </div>
                   </div>
                   <div className="text-right">
@@ -103,9 +105,9 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                 </div>
               </div>
 
-              {/* 2 Metric Score Breakdown Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Skill Score (70%) */}
+              {/* 3 Metric Score Breakdown Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Skill Score (50%) */}
                 <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between text-xs text-zinc-400">
                     <span className="flex items-center gap-1.5 font-medium text-zinc-200">
@@ -115,12 +117,27 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                     <span className="text-emerald-400 font-bold font-mono">{skillScore.toFixed(0)}%</span>
                   </div>
                   <div className="flex justify-between text-[11px] text-zinc-400 pt-1 border-t border-zinc-800/50">
-                    <span>Weight: <strong className="text-zinc-200">70%</strong></span>
+                    <span>Weight: <strong className="text-zinc-200">50%</strong></span>
                     <span>Contribution: <strong className="text-emerald-300 font-mono">+{skillContribution} pts</strong></span>
                   </div>
                 </div>
 
-                {/* Experience Score (30%) */}
+                {/* Semantic Score (30%) */}
+                <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between text-xs text-zinc-400">
+                    <span className="flex items-center gap-1.5 font-medium text-zinc-200">
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Semantic Match</span>
+                    </span>
+                    <span className="text-purple-400 font-bold font-mono">{semanticScore.toFixed(0)}%</span>
+                  </div>
+                  <div className="flex justify-between text-[11px] text-zinc-400 pt-1 border-t border-zinc-800/50">
+                    <span>Weight: <strong className="text-zinc-200">30%</strong></span>
+                    <span>Contribution: <strong className="text-purple-300 font-mono">+{semanticContribution} pts</strong></span>
+                  </div>
+                </div>
+
+                {/* Experience Score (20%) */}
                 <div className="bg-zinc-950/60 border border-zinc-800/80 rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between text-xs text-zinc-400">
                     <span className="flex items-center gap-1.5 font-medium text-zinc-200">
@@ -130,7 +147,7 @@ export const ExplainMatchModal: React.FC<ExplainMatchModalProps> = ({
                     <span className="text-indigo-400 font-bold font-mono">{expScore.toFixed(0)}%</span>
                   </div>
                   <div className="flex justify-between text-[11px] text-zinc-400 pt-1 border-t border-zinc-800/50">
-                    <span>Weight: <strong className="text-zinc-200">30%</strong></span>
+                    <span>Weight: <strong className="text-zinc-200">20%</strong></span>
                     <span>Contribution: <strong className="text-indigo-300 font-mono">+{expContribution} pts</strong></span>
                   </div>
                 </div>

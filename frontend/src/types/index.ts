@@ -62,6 +62,7 @@ export interface Application {
   application_status: 'applied' | 'shortlisted' | 'rejected' | 'hired';
   applied_at: string;
   skill_score?: number;
+  semantic_score?: number;
   experience_score?: number;
   final_score?: number;
   match_score?: number;
@@ -82,6 +83,7 @@ export interface RankedCandidate {
   candidate_email?: string;
   location?: string;
   skill_score: number;
+  semantic_score?: number;
   experience_score: number;
   final_score: number;
   years_experience?: number;
@@ -93,6 +95,7 @@ export interface ExplainableMatch {
   job_id: number;
   scores: {
     skill_score: number;
+    semantic_score?: number;
     experience_score: number;
     final_score: number;
     matched_at: string;
@@ -102,6 +105,7 @@ export interface ExplainableMatch {
   } | null;
   formula_weights: {
     skill_weight: string;
+    semantic_weight?: string;
     experience_weight: string;
   };
   matched_skills?: { skill_name: string; proficiency?: string }[];

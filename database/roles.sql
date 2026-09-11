@@ -58,14 +58,14 @@ GRANT SELECT ON candidates, resumes, resume_extracted_data, resume_embeddings, s
 GRANT SELECT, UPDATE ON recruiters TO app_recruiter;
 
 -- Recruiters can view read-only database views
-GRANT SELECT ON candidate_profile_view, job_match_view, recruiter_job_summary_view TO app_recruiter;
+GRANT SELECT ON candidate_profile_view, job_match_view TO app_recruiter;
 
 -- Recruiters can use sequence generators for new jobs
 GRANT USAGE, SELECT ON SEQUENCE jobs_job_id_seq TO app_recruiter;
 
 -- Recruiters can execute matching functions
-GRANT EXECUTE ON FUNCTION calculate_candidate_job_match(INT, INT) TO app_recruiter;
-GRANT EXECUTE ON FUNCTION get_top_candidates(INT, INT) TO app_recruiter;
+GRANT EXECUTE ON FUNCTION calculate_skill_match(INT, INT) TO app_recruiter;
+GRANT EXECUTE ON FUNCTION get_top_candidates(INT) TO app_recruiter;
 
 -- ============================================================================
 -- 5. GRANT PRIVILEGES: app_candidate

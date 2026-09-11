@@ -165,10 +165,10 @@ export const ApplicationsView: React.FC<ApplicationsViewProps> = ({
 
                     {/* Score */}
                     <td className="px-6 py-4">
-                      {app.match_score !== null ? (
+                      {app.final_score != null ? (
                         <div className="flex items-center gap-2">
                           <span className="font-mono font-bold text-zinc-200 text-sm">
-                            {Number(app.match_score).toFixed(0)}%
+                            {Number(app.final_score).toFixed(0)}%
                           </span>
                           <button
                             onClick={() => selectedJobId && onExplainMatch(selectedJobId, app.candidate_id)}

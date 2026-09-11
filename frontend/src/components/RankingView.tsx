@@ -52,13 +52,13 @@ export const RankingView: React.FC<RankingViewProps> = ({
               <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
               <span>Table-Valued PL/pgSQL Function</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-display flex items-center gap-2.5">
+            <h1 className="text-xl font-bold text-white flex items-center gap-2">
               <Award className="w-7 h-7 text-zinc-200" />
               <span>Candidate Matching Leaderboard</span>
             </h1>
             <p className="text-zinc-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
               Evaluating candidate qualification via <code className="font-mono text-zinc-200 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">get_top_candidates(p_job_id)</code> using the relational formula:
-              <span className="text-zinc-100 font-semibold ml-1">70% Skill Score + 30% Experience Score</span>.
+              <span className="text-zinc-100 font-semibold ml-1">50% Skill + 30% Semantic + 20% Experience</span>.
             </p>
           </div>
 
@@ -111,6 +111,7 @@ export const RankingView: React.FC<RankingViewProps> = ({
             const finalScore = Number(c.final_score || 0);
             const skillScore = Number(c.skill_score || 0);
             const expScore = Number(c.experience_score || 0);
+            const semanticScore = Number(c.semantic_score || 0);
 
             return (
               <div
@@ -156,11 +157,11 @@ export const RankingView: React.FC<RankingViewProps> = ({
                     </div>
                   </div>
 
-                  {/* Middle: Score Progress Indicators (70/30) */}
-                  <div className="flex-1 max-w-md grid grid-cols-2 gap-4 bg-zinc-900/40 p-3 rounded-xl border border-zinc-800/50">
+                  {/* Middle: Score Progress Indicators (50/30/20) */}
+                  <div className="flex-1 max-w-md grid grid-cols-3 gap-3 bg-zinc-900/40 p-3 rounded-xl border border-zinc-800/50">
                     <div>
-                      <div className="flex justify-between text-[11px] mb-1">
-                        <span className="text-zinc-400">Skill (70%)</span>
+                      <div className="flex justify-between text-[10px] mb-1">
+                        <span className="text-zinc-400">Skill (50%)</span>
                         <span className="font-mono text-zinc-200 font-semibold">{skillScore.toFixed(0)}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
@@ -170,10 +171,23 @@ export const RankingView: React.FC<RankingViewProps> = ({
                         />
                       </div>
                     </div>
+                    
+                    <div>
+                      <div className="flex justify-between text-[10px] mb-1">
+                        <span className="text-zinc-400">Semantic (30%)</span>
+                        <span className="font-mono text-zinc-200 font-semibold">{semanticScore.toFixed(0)}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-purple-400 rounded-full"
+                          style={{ width: `${Math.min(100, Math.max(0, semanticScore))}%` }}
+                        />
+                      </div>
+                    </div>
 
                     <div>
-                      <div className="flex justify-between text-[11px] mb-1">
-                        <span className="text-zinc-400">Exp (30%)</span>
+                      <div className="flex justify-between text-[10px] mb-1">
+                        <span className="text-zinc-400">Exp (20%)</span>
                         <span className="font-mono text-zinc-200 font-semibold">{expScore.toFixed(0)}%</span>
                       </div>
                       <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">

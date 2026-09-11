@@ -14,12 +14,12 @@ export const applyToJob = async (candidateId: number, jobId: number) => {
       a.job_id,
       a.status,
       a.applied_at,
-      m.skill_score,
-      m.semantic_score,
-      m.experience_score,
-      m.final_score
+      gtc.skill_score,
+      gtc.semantic_score,
+      gtc.experience_score,
+      gtc.final_score
     FROM applications a
-    LEFT JOIN matches m ON (a.candidate_id = m.candidate_id AND a.job_id = m.job_id)
+    LEFT JOIN get_top_candidates($2) gtc ON gtc.candidate_id = a.candidate_id
     WHERE a.candidate_id = $1 AND a.job_id = $2;
     `,
     [candidateId, jobId]
@@ -42,10 +42,10 @@ export const getApplicationsByJob = async (jobId: number) => {
       a.job_id,
       a.status AS application_status,
       a.applied_at,
-      m.skill_score,
-      m.semantic_score,
-      m.experience_score,
-      m.final_score
+      gtc.skill_score,
+      gtc.semantic_score,
+      gtc.experience_score,
+      gtc.final_score
     FROM applications a
     JOIN candidates c ON a.candidate_id = c.candidate_id
     JOIN users u ON c.user_id = u.user_id
@@ -56,9 +56,9 @@ export const getApplicationsByJob = async (jobId: number) => {
       ORDER BY uploaded_at DESC
       LIMIT 1
     ) r ON TRUE
-    LEFT JOIN matches m ON (a.candidate_id = m.candidate_id AND a.job_id = m.job_id)
+    LEFT JOIN get_top_candidates($1) gtc ON gtc.candidate_id = a.candidate_id
     WHERE a.job_id = $1
-    ORDER BY m.final_score DESC NULLS LAST, a.applied_at DESC;
+    ORDER BY gtc.final_score DESC NULLS LAST, a.applied_at DESC;
   `;
   const result = await query(sql, [jobId]);
   return result.rows;

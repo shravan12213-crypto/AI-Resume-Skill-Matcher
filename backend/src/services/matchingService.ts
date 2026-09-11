@@ -4,16 +4,20 @@ import { query } from '../config/db';
 export const getTopCandidatesForJob = async (jobId: number, limit: number = 10) => {
   const sql = `
     SELECT 
-      candidate_id,
-      candidate_name,
-      email,
-      location,
-      skill_score,
-      semantic_score,
-      experience_score,
-      final_score,
-      application_status
-    FROM get_top_candidates($1, $2);
+      gtc.candidate_id,
+      gtc.candidate_name,
+      u.email,
+      c.location,
+      gtc.skill_score,
+      gtc.semantic_score,
+      gtc.experience_score,
+      gtc.final_score,
+      a.status AS application_status
+    FROM get_top_candidates($1) gtc
+    JOIN candidates c ON gtc.candidate_id = c.candidate_id
+    JOIN users u ON c.user_id = u.user_id
+    LEFT JOIN applications a ON gtc.candidate_id = a.candidate_id AND a.job_id = $1
+    LIMIT $2;
   `;
   const result = await query(sql, [jobId, limit]);
   return result.rows;
@@ -23,19 +27,17 @@ export const getExplainableMatch = async (jobId: number, candidateId: number) =>
   // 1. Fetch scores
   const scoreSql = `
     SELECT 
-      m.skill_score,
-      m.semantic_score,
-      m.experience_score,
-      m.final_score,
-      m.matched_at,
+      gtc.skill_score,
+      gtc.semantic_score,
+      gtc.experience_score,
+      gtc.final_score,
+      NOW() AS matched_at,
       j.title AS job_title,
       j.experience_required,
-      u.name AS candidate_name
-    FROM matches m
-    JOIN jobs j ON m.job_id = j.job_id
-    JOIN candidates c ON m.candidate_id = c.candidate_id
-    JOIN users u ON c.user_id = u.user_id
-    WHERE m.job_id = $1 AND m.candidate_id = $2;
+      gtc.candidate_name
+    FROM get_top_candidates($1) gtc
+    JOIN jobs j ON j.job_id = $1
+    WHERE gtc.candidate_id = $2;
   `;
   const scoreResult = await query(scoreSql, [jobId, candidateId]);
   const scoreData = scoreResult.rows[0] || null;
@@ -85,10 +87,4 @@ export const getExplainableMatch = async (jobId: number, candidateId: number) =>
       missing_optional: missingOptionalSkills,
     },
   };
-};
-
-export const calculateMatch = async (candidateId: number, jobId: number) => {
-  const sql = `SELECT calculate_candidate_job_match($1, $2) AS final_score;`;
-  const result = await query(sql, [candidateId, jobId]);
-  return result.rows[0];
 };

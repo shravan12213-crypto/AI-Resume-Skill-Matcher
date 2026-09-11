@@ -54,12 +54,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span>In-Database PL/pgSQL Matching Engine</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white font-display">
-              Welcome, {recruiter?.name || 'Recruiter'}
+            <div className="space-y-1">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-display">
+              Recruiter Dashboard
             </h1>
-            <p className="text-zinc-400 text-sm sm:text-base leading-relaxed">
-              Monitoring talent pipelines for <span className="text-zinc-100 font-semibold">{recruiter?.company_name || 'TechCorp'}</span>. Candidate ranking and scoring are computed deterministically inside PostgreSQL (70% Skill + 30% Experience).
+            <p className="text-zinc-400 text-sm">
+              Monitoring talent pipelines for <span className="text-zinc-100 font-semibold">{recruiter?.company_name || 'TechCorp'}</span>. Candidate ranking and scoring are computed deterministically inside PostgreSQL (50% Skill + 30% Semantic + 20% Experience).
             </p>
+          </div>
           </div>
 
           <div className="flex items-center gap-3 flex-shrink-0">
@@ -131,7 +133,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold text-indigo-300 font-display">{overallAvgScore}%</div>
-            <p className="text-xs text-zinc-500 mt-1">From `recruiter_job_summary_view`</p>
+            <p className="text-xs text-zinc-500 mt-1">From jobs and applications</p>
           </CardContent>
         </Card>
       </div>

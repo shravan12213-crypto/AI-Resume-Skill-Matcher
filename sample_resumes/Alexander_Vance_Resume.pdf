@@ -1,0 +1,169 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R /F2 6 0 R >> >> >>
+endobj
+4 0 obj
+<< /Length 2713 >>
+stream
+BT
+/F1 20 Tf
+50 740 Td
+(ALEXANDER VANCE) Tj
+ET
+BT
+/F2 10 Tf
+50 722 Td
+(Senior PostgreSQL & Full Stack Engineer | alexander.vance@example.com | +1 (555) 019-2834 | San Francisco, CA) Tj
+ET
+0.2 w
+0.7 0.7 0.7 RG
+50 710 m
+550 710 l
+S
+BT
+/F1 12 Tf
+0 0 0 rg
+50 690 Td
+(PROFESSIONAL SUMMARY) Tj
+ET
+BT
+/F2 9 Tf
+50 675 Td
+(Accomplished Database Architect and Full Stack Engineer with 5+ years of experience engineering high-throughput) Tj
+0 -13 Td
+(relational systems, in-database PL/pgSQL stored procedures, query optimization, and resilient TypeScript backend APIs.) Tj
+ET
+BT
+/F1 12 Tf
+50 640 Td
+(TECHNICAL SKILLS) Tj
+ET
+BT
+/F2 9 Tf
+50 625 Td
+(Core Skills: PostgreSQL, SQL, Python, TypeScript, Node.js, React, Docker, Redis, Git, PL/pgSQL, Database Normalization) Tj
+0 -13 Td
+(Specializations: Query Execution Planning, Composite Indexing, Transactional Concurrency, AI Integration) Tj
+ET
+BT
+/F1 12 Tf
+50 590 Td
+(WORK EXPERIENCE) Tj
+ET
+BT
+/F1 10 Tf
+50 575 Td
+(Lead Database Architect - CloudScale Systems, Inc.) Tj
+ET
+BT
+/F2 9 Tf
+420 575 Td
+(2023 - Present | 3 Years) Tj
+ET
+BT
+/F2 9 Tf
+60 560 Td
+(- Architected high-performance PostgreSQL databases, indexing strategies, and automated partitioning.) Tj
+0 -12 Td
+(- Authored custom PL/pgSQL table-valued functions for real-time candidate and transaction scoring.) Tj
+0 -12 Td
+(- Reduced analytical query execution latency by 45% through EXPLAIN ANALYZE index optimization.) Tj
+ET
+BT
+/F1 10 Tf
+50 520 Td
+(Senior Software Engineer - FinTech Innovations Ltd.) Tj
+ET
+BT
+/F2 9 Tf
+420 520 Td
+(2021 - 2023 | 2 Years) Tj
+ET
+BT
+/F2 9 Tf
+60 505 Td
+(- Developed modular Node.js & TypeScript microservices handling 10M+ daily events.) Tj
+0 -12 Td
+(- Integrated Redis caching layer and transactional atomic stored procedures with zero data inconsistency.) Tj
+ET
+BT
+/F1 12 Tf
+50 465 Td
+(EDUCATION) Tj
+ET
+BT
+/F1 10 Tf
+50 450 Td
+(Master of Science in Computer Science) Tj
+ET
+BT
+/F2 9 Tf
+400 450 Td
+(Stanford University | 2019 - 2021) Tj
+ET
+BT
+/F2 9 Tf
+60 436 Td
+(Specialization in Distributed Systems and Relational Database Management Systems.) Tj
+ET
+BT
+/F1 10 Tf
+50 415 Td
+(Bachelor of Science in Computer Engineering) Tj
+ET
+BT
+/F2 9 Tf
+400 415 Td
+(UC Berkeley | 2015 - 2019) Tj
+ET
+BT
+/F1 12 Tf
+50 380 Td
+(PROJECTS & CERTIFICATIONS) Tj
+ET
+BT
+/F1 9.5 Tf
+50 365 Td
+(AI-Powered Resume Skill Matcher) Tj
+ET
+BT
+/F2 9 Tf
+60 352 Td
+(- Designed an in-database PostgreSQL table-valued function using 70% Skill + 30% Experience weighting.) Tj
+0 -12 Td
+(- Built automated trigger-based audit pipelines and REST APIs connecting React frontend to PostgreSQL.) Tj
+ET
+BT
+/F2 9 Tf
+50 320 Td
+(Certifications: PostgreSQL Certified Professional (PCP), AWS Certified Solutions Architect - Associate) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+6 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000257 00000 n 
+0000003022 00000 n 
+0000003097 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+3167
+%%EOF
